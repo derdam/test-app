@@ -1,0 +1,36 @@
+body {
+	font-family: "arial", "helvetica", "sans-serif";
+}
+
+.msgframe {
+	width:100%;
+	padding:00px;
+	border:1px solid gray;
+	background-color: #F8F8F8; 
+	margin-bottom:10px;
+}
+
+.msghead {
+	background-color: #E8E8E8;
+	padding: 5px;
+}
+
+.msgcontent {
+	padding:5px;
+	border:1px #D0D0D0 ;
+	background-color: white; 
+	margin:10px;
+}
+
+p.msgcontent {
+	color: red;
+}
+
+.msgfoot {
+	padding:5px;
+	margin:10px;
+}
+
+
+
+

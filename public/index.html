@@ -1,0 +1,158 @@
+<html>
+	<head>
+    	<link href="css/style.css" rel="stylesheet" type="text/css">
+		<title>Index</title>
+	</head>
+	
+	<body>
+     	  
+	
+		<!-- Send Message frame. A textbox and a send button. -->
+		<div class="msgframe">
+			<div class="msghead"><strong>Broadcast message</strong></div>
+			<div class="msgcontent">
+				<input data-bind="value: msgToSend" /><button data-bind="click: wsTest">Send</button>
+<button data-bind="click: wsTestData">Test data</button>
+			</div>
+		</div>
+		
+		<!-- Received Message frame. A textbox. -->
+		<div class="msgframe">
+			<div class="msghead"><strong>Received message</strong></div>
+			<div class="msgcontent"><span data-bind="text: message"></span></div>
+			<div class="msgfoot"><small>Last update: <span data-bind="text: clock"></span></small></div>
+		</div>
+	
+		<!-- local QR code scanner -->
+		<div class="msgframe">
+			<div class="msghead"><strong>QR code decoder</strong></div>
+			<canvas id="qr-canvas" width="240" height="240"></canvas>
+			<button data-bind="click: testDecodeQrLocal">Test</button><button data-bind="click: testDecodeQrLocalMessage">Decode QR code</button>
+			<div class="msgcontent"><span data-bind="text: decodedQr"></span></div>
+ 	</div>
+	
+
+	
+	</body>
+	
+</html>
+
+<!--Include JavaScripts for JQuery and Knockout.js <-->
+<script type='text/javascript', src='http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.js'></script>
+<script type='text/javascript', src='http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js'></script>
+
+<!-- Web sockets -->
+<script src="/socket.io/socket.io.js"></script>
+ 
+<!-- Qr Code decoding -->
+<script type="text/javascript" src="js/grid.js"></script>
+<script type="text/javascript" src="js/version.js"></script>
+<script type="text/javascript" src="js/detector.js"></script>
+<script type="text/javascript" src="js/formatinf.js"></script>
+<script type="text/javascript" src="js/errorlevel.js"></script>
+<script type="text/javascript" src="js/bitmat.js"></script>
+<script type="text/javascript" src="js/datablock.js"></script>
+<script type="text/javascript" src="js/bmparser.js"></script>
+<script type="text/javascript" src="js/datamask.js"></script>
+<script type="text/javascript" src="js/rsdecoder.js"></script>
+<script type="text/javascript" src="js/gf256poly.js"></script>
+<script type="text/javascript" src="js/gf256.js"></script>
+<script type="text/javascript" src="js/decoder.js"></script>
+<script type="text/javascript" src="js/qrcode.js"></script>
+<script type="text/javascript" src="js/findpat.js"></script>
+<script type="text/javascript" src="js/alignpat.js"></script>
+<script type="text/javascript" src="js/databr.js"></script>
+
+<script type="text/javascript">
+
+		// var socket = io.connect('http://192.168.10.153:8080');
+	    var socket = io.connect(':8080');
+	
+        // Here's my data model
+        var viewModel = {
+            ccode: ko.observable(''),
+            ndc: ko.observable(''),
+			sn: ko.observable(''),
+			country: ko.observable(''),
+			qrcodeUrl: ko.observable(),
+			message: ko.observable(''),
+			msgToSend: ko.observable(''),
+			clock: ko.observable(new Date()),
+			decodedQr: ko.observable('')
+        };
+		
+		
+		viewModel.createQrCode = function() {
+		  viewModel.clock(new Date());
+		  
+		  var qrdata = viewModel.clock()+' '+viewModel.message();
+		
+		  viewModel.loadCanvas( '../qr?data="+'+qrdata+'"');
+		};
+		
+		
+		viewModel.testDecodeQrLocal = function() {
+			qrcode.decode('img/qrtest.png');
+		};
+		
+		viewModel.testDecodeQrLocalMessage = function() {
+			try {
+					qrcode.decode(); 
+				}
+			catch (err) {
+				viewModel.decodedQr('ERROR: '+err);
+			}
+		};
+		
+		viewModel.loadCanvas = function(url) {
+			var canvas = document.getElementById('qr-canvas');
+			var context = canvas.getContext('2d');
+			var imageObj = new Image();
+
+			imageObj.onload = function() {
+				context.drawImage(imageObj, 0,0,230,230);
+				viewModel.testDecodeQrLocalMessage();
+			};
+			imageObj.src = url;
+		}
+		
+/*
+		viewModel.qrcodeMessageTs = ko.computed(function () {
+			// var qrdata = viewModel.ccode()+viewModel.ndc()+viewModel.sn();
+			var qrdata = viewModel.clock()+' '+viewModel.message();
+			//qrcode('../qr', {data: qrdata}, viewModel.qrcode);
+            
+			viewModel.loadCanvas( '../qr?data="+'+qrdata+'"');
+			//return '../qr?data="+'+qrdata+'"'; // viewModel.ccode()+" 				"+viewModel.ndc()+" "+viewModel.sn();
+			
+        	});
+		
+*/
+		viewModel.wsTest = function() {
+			socket.emit('message', viewModel.msgToSend());
+			//viewModel.msgToSend('');
+		};
+
+
+		viewModel.wsTestData = function() {
+			viewModel.msgToSend("{ouid='03849-3498359-39428-340-43', legdoccod='540', sgndate='20143103'}");
+		};
+		
+		socket.on('message', function(message) {
+			// alert('Received this message : ' + message);
+			viewModel.message(message.content);
+			viewModel.clock(new Date());
+			viewModel.createQrCode();
+		});
+
+		// setInterval(viewModel.createQrCode, 1000);
+		
+        ko.applyBindings(viewModel); // This makes Knockout get to work
+		
+		// This will set the qr reader to inform us on qr recognition
+		qrcode.callback =  function(data) {
+				viewModel.decodedQr(data);	
+		};
+		
+ </script>
+ 
