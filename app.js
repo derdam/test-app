@@ -95,15 +95,15 @@ var proxy = new httpProxy.createProxyServer({
 
 // WebSocket event handlers
 
-var lastBcMsg = ''; // holds last broadcasted message
+var lastBcMsgHist = new Array(); // holds last broadcasted messages
 
 
 // on client connect:
 io.sockets.on('connection', function(socket) {
 
-	var cnt = lastBcMsg; // return last broadcasted message
+	var cnt = lastBcMsgHist[0]; // return last broadcasted message
 
-	if (cnt=='') {
+	if (!cnt) {
 		cnt = 'Websocket connection accepted by server.';
 	}
 	console.log('[WS] connection');
@@ -119,8 +119,8 @@ io.sockets.on('connection', function(socket) {
 		 // emit to all other users (except the sender!!)
 		 socket.broadcast.emit('message', { content:message});
 
-		// store broadcasted message as last broadcasted message
-		lastBcMsg = message;
+		// store broadcasted message in last broadcasted messages
+		lastBcMsgHist.push(message);
     }); 
 
 });
