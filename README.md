@@ -1,4 +1,4 @@
-This is my first Git try.
+This is my first git try.
 
 A Node.js project that implements client side Qr code recognition and server side Qr code generation.
 
