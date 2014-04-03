@@ -158,7 +158,8 @@
 			var data;
 			$.get('../message/hist', {}, data);
 
-                      viewModel.broadcastHistory.push(data);
+			
+                     // viewModel.broadcastHistory.push(data);
 		};
 		
 		socket.on('message', function(message) {
@@ -166,7 +167,7 @@
 			viewModel.message(message.content);
 			viewModel.clock(new Date());
 			viewModel.createQrCode();
-			viewModel.broadcastHistory.unshift(message); //{ content:message.content, received: message.received});
+			viewModel.broadcastHistory.unshift(message);
 		});
 
 		// setInterval(viewModel.createQrCode, 1000);
@@ -178,7 +179,7 @@
 				viewModel.decodedQr(data);	
 		};
 		
-		//viewModel.loadbroadcastHistory();
+		viewModel.loadbroadcastHistory();
 		
  </script>
  

@@ -127,7 +127,7 @@ io.sockets.on('connection', function(socket) {
 		socket.broadcast.emit('message', resmsg);
 
 		// store broadcasted message in last broadcasted messages
-		lastBcMsgHist.push(resmsg); //{ content:message});
+		lastBcMsgHist.push(resmsg);
 		
 		// limit the message history count
 		if (lastBcMsgHist.length > 7) {
