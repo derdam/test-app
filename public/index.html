@@ -40,8 +40,8 @@
 				</thead>
 				<tbody data-bind="foreach: broadcastHistory">
 					<tr>
-						<td data-bind="text: $data"></td>
-						<td>unknown</td>
+						<td data-bind="text: content"></td>
+						<td data-bind="text: received"></td>
 					</tr>
 				</tbody>
 			</table>
@@ -155,7 +155,10 @@
 		};
 		
 		viewModel.loadbroadcastHistory = function() {
-			$.get('../message/hist', {}, viewModel.broadcastHistory);
+			var data;
+			$.get('../message/hist', {}, data);
+
+                      viewModel.broadcastHistory.push(data);
 		};
 		
 		socket.on('message', function(message) {
@@ -163,7 +166,7 @@
 			viewModel.message(message.content);
 			viewModel.clock(new Date());
 			viewModel.createQrCode();
-			viewModel.broadcastHistory.unshift(message.content);
+			viewModel.broadcastHistory.unshift({ content:message.content, received: new Date()});
 		});
 
 		// setInterval(viewModel.createQrCode, 1000);
