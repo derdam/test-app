@@ -40,8 +40,8 @@
 				</thead> -->
 				<tbody data-bind="foreach: broadcastHistory">
 					<tr>
-						<td data-bind="text: content">&nbsp</td>
-						<td data-bind="text: received"></td>
+						<td><div class=msgitem><div><span data-bind="text: content"></span></div>
+						<div><span data-bind="text: received"></span></div></div></td>
 					</tr>
 				</tbody>
 			</table>

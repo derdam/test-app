@@ -22,7 +22,15 @@ body {
 	margin:10px;
 }
 
-p.msgcontent {
+.msgitem {
+	padding:2px;
+	border:3px;
+	background-color: #F0F0F0; 
+	margin:2px;
+	
+}
+
+p.msgcontent {gh
 	color: red;
 }
 
