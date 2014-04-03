@@ -105,7 +105,7 @@ var lastBcMsgHist = new Array(); // holds last broadcasted messages
 // on client connect:
 io.sockets.on('connection', function(socket) {
 
-	var cnt = lastBcMsgHist[0]; // return last broadcasted message
+	var cnt = lastBcMsgHist[lastBcMsgHist.length-1]; // return last broadcasted message
 
 	if (!cnt) {
 		cnt = 'Websocket connection accepted by server.';
