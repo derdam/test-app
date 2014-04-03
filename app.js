@@ -82,7 +82,7 @@ app.post('/user', function (req, res) {
 	proxy.web(req, res);
 });
 
-
+// returns the history of broadcasted messages
 app.get('/message/hist', function (req, res) {
 	res.json(lastBcMsgHist);
 });
