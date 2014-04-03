@@ -5,14 +5,13 @@
 	</head>
 	
 	<body>
-     	  
 	
-		<!-- Send Message frame. A textbox and a send button. -->
+ 		<!-- Send Message frame. A textbox and a send button. -->
 		<div class="msgframe">
 			<div class="msghead"><strong>Broadcast message</strong></div>
 			<div class="msgcontent">
 				<input data-bind="value: msgToSend" /><button data-bind="click: wsTest">Send</button>
-<button data-bind="click: wsTestData">Test data</button>
+				<button data-bind="click: wsTestData">Test data</button>
 			</div>
 		</div>
 		
@@ -29,11 +28,28 @@
 			<canvas id="qr-canvas" width="240" height="240"></canvas>
 			<button data-bind="click: testDecodeQrLocal">Test</button><button data-bind="click: testDecodeQrLocalMessage">Decode QR code</button>
 			<div class="msgcontent"><span data-bind="text: decodedQr"></span></div>
- 	</div>
-	
-	
+		</div>
+		
+		<!-- brodcasted messages history. A table -->
+		
+		<div class="msgframe">
+			<div class="msghead"><strong>Broadcast messages history</strong></div>
+			<table>
+				<thead>
+					<tr><th>Message</th><th>Received</th></tr>
+				</thead>
+				<tbody data-bind="foreach: broadcastHistory">
+					<tr>
+						<td data-bind="text: $data"></td>
+						<td>unknown</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		
+		
 	</body>
-	
+
 </html>
 
 <!--Include JavaScripts for JQuery and Knockout.js <-->
@@ -77,7 +93,8 @@
 			message: ko.observable(''),
 			msgToSend: ko.observable(''),
 			clock: ko.observable(new Date()),
-			decodedQr: ko.observable('')
+			decodedQr: ko.observable(''),
+			broadcastHistory: ko.observableArray()
         };
 		
 		
@@ -137,11 +154,16 @@
 			viewModel.msgToSend("{ouid='03849-3498359-39428-340-43', legdoccod='540', sgndate='20143103'}");
 		};
 		
+		viewModel.loadbroadcastHistory = function() {
+			$.get('../message/hist', {}, viewModel.broadcastHistory);
+		};
+		
 		socket.on('message', function(message) {
 			// alert('Received this message : ' + message);
 			viewModel.message(message.content);
 			viewModel.clock(new Date());
 			viewModel.createQrCode();
+			viewModel.broadcastHistory.unshift(message.content);
 		});
 
 		// setInterval(viewModel.createQrCode, 1000);
@@ -152,6 +174,8 @@
 		qrcode.callback =  function(data) {
 				viewModel.decodedQr(data);	
 		};
+		
+		viewModel.loadbroadcastHistory();
 		
  </script>
  
