@@ -41,7 +41,7 @@
 				<tbody data-bind="foreach: broadcastHistory">
 					<tr>
 						<td><div class=msgitem><div><span data-bind="text: content"></span></div>
-						<div><span data-bind="text: received"></span></div></div></td>
+						<div><small><span data-bind="text: received"></span></small></div></div></td>
 					</tr>
 				</tbody>
 			</table>
