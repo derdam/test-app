@@ -166,7 +166,7 @@
 			viewModel.message(message.content);
 			viewModel.clock(new Date());
 			viewModel.createQrCode();
-			viewModel.broadcastHistory.unshift({ content:message.content, received: new Date()});
+			viewModel.broadcastHistory.unshift(message); //{ content:message.content, received: message.received});
 		});
 
 		// setInterval(viewModel.createQrCode, 1000);

@@ -108,7 +108,7 @@ io.sockets.on('connection', function(socket) {
 	var cnt = lastBcMsgHist[lastBcMsgHist.length-1]; // return last broadcasted message
 
 	if (!cnt) {
-		cnt = {content:'Websocket connection accepted by server.'};
+		cnt = {content:'Websocket connection accepted by server.', received: new Date()};
 	}
 	console.log('[WS] connection');
 	socket.emit('message', cnt);
@@ -116,15 +116,18 @@ io.sockets.on('connection', function(socket) {
 	 // on message receive (from a channel called 'message')    
     socket.on('message', function (message) {
         console.log('[WS] message received : ' + message);
-		
-		// emit message to sender only:
-		 socket.emit('message',  { content:message});
+			
+		// build the response message		
+		var resmsg =  {content:message, received:new Date()};
+
+		// emit message response to sender only:
+		 socket.emit('message', resmsg);
 		 
-		 // emit to all other users (except the sender!!)
-		 socket.broadcast.emit('message', { content:message});
+		// emit message response to all other users (except the sender!!)
+		socket.broadcast.emit('message', resmsg);
 
 		// store broadcasted message in last broadcasted messages
-		lastBcMsgHist.push({ content:message});
+		lastBcMsgHist.push(resmsg); //{ content:message});
 		
 		// limit the message history count
 		if (lastBcMsgHist.length > 7) {
