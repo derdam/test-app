@@ -83,6 +83,10 @@ app.post('/user', function (req, res) {
 });
 
 
+app.get('/message/hist', function (req, res) {
+	res.json(lastBcMsgHist);
+});
+
 // sample: proxying service using 'http-proxy' module:
 // configure service proxy
 
@@ -121,6 +125,11 @@ io.sockets.on('connection', function(socket) {
 
 		// store broadcasted message in last broadcasted messages
 		lastBcMsgHist.push(message);
+		
+		// limit the message history count
+		if (lastBcMsgHist.length > 7) {
+			lastBcMsgHist.splice(0,1); // remove first item in array
+		}
     }); 
 
 });
