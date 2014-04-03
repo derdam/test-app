@@ -40,7 +40,7 @@
 				</thead>
 				<tbody data-bind="foreach: broadcastHistory">
 					<tr>
-						<td data-bind="text: message"></td>
+						<td data-bind="text: content"></td>
 						<td data-bind="text: received"></td>
 					</tr>
 				</tbody>
@@ -166,7 +166,7 @@
 			viewModel.message(message.content);
 			viewModel.clock(new Date());
 			viewModel.createQrCode();
-			viewModel.broadcastHistory.unshift({ message:message.content, received: new Date()});
+			viewModel.broadcastHistory.unshift({ content:message.content, received: new Date()});
 		});
 
 		// setInterval(viewModel.createQrCode, 1000);
@@ -178,7 +178,7 @@
 				viewModel.decodedQr(data);	
 		};
 		
-		viewModel.loadbroadcastHistory();
+		//viewModel.loadbroadcastHistory();
 		
  </script>
  

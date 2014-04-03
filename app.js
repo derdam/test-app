@@ -108,10 +108,10 @@ io.sockets.on('connection', function(socket) {
 	var cnt = lastBcMsgHist[lastBcMsgHist.length-1]; // return last broadcasted message
 
 	if (!cnt) {
-		cnt = 'Websocket connection accepted by server.';
+		cnt = {content:'Websocket connection accepted by server.'};
 	}
 	console.log('[WS] connection');
-	socket.emit('message', {content: cnt});
+	socket.emit('message', cnt);
   
 	 // on message receive (from a channel called 'message')    
     socket.on('message', function (message) {
@@ -124,7 +124,7 @@ io.sockets.on('connection', function(socket) {
 		 socket.broadcast.emit('message', { content:message});
 
 		// store broadcasted message in last broadcasted messages
-		lastBcMsgHist.push(message);
+		lastBcMsgHist.push({ content:message});
 		
 		// limit the message history count
 		if (lastBcMsgHist.length > 7) {
