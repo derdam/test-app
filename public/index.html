@@ -31,6 +31,7 @@
 		</div>
 		
 		<!-- brodcasted messages history. A table -->
+		<!--
 		<div class="msgframe">
 			<div class="msghead"><strong>Broadcast messages history</strong></div>
 			<table>
@@ -45,6 +46,7 @@
 				</tbody>
 			</table>
 		</div>
+		-->
 		
 	</body>
 
@@ -153,7 +155,7 @@
 		};
 		
 		viewModel.loadbroadcastHistory = function() {
-			$.get('../message/hist', {}, viewModel.broadcastHistory());
+			$.get('../message/hist', {}, viewModel.broadcastHistory);
 		};
 		
 		socket.on('message', function(message) {
@@ -173,7 +175,7 @@
 				viewModel.decodedQr(data);	
 		};
 		
-		viewModel.loadbroadcastHistory();
+		//viewModel.loadbroadcastHistory();
 		
  </script>
  
