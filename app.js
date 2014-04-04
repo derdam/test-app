@@ -104,14 +104,16 @@ var lastBcMsgHist = new Array(); // holds last broadcasted messages
 
 // on client connect:
 io.sockets.on('connection', function(socket) {
-
+	
+	console.log('[WS] connection');
+	/*
 	var cnt = lastBcMsgHist[lastBcMsgHist.length-1]; // return last broadcasted message
 
 	if (!cnt) {
 		cnt = {content:'Websocket connection accepted by server.', received: new Date()};
 	}
-	console.log('[WS] connection');
 	socket.emit('message', cnt);
+	*/
   
 	 // on message receive (from a channel called 'message')    
     socket.on('message', function (message) {

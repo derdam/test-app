@@ -157,10 +157,15 @@
 		
 		viewModel.loadbroadcastHistory = function() {
 			var data;
-			$.get('../message/hist', {}, data);
+			$.getJSON('../message/hist', function(data) {	
+				if (data) {
+					var data2=viewModel.broadcastHistory();
+					
+                     			viewModel.broadcastHistory(data2.concat(data).reverse());
+				};
 
 			
-                     // viewModel.broadcastHistory.push(data);
+			});
 		};
 		
 		socket.on('message', function(message) {
