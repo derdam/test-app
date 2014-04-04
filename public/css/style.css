@@ -30,6 +30,9 @@ body {
 	
 }
 
+
+tr:hover {background-color: #E8E8E8}
+
 p.msgcontent {gh
 	color: red;
 }
