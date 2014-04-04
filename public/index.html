@@ -159,9 +159,13 @@
 			var data;
 			$.getJSON('../message/hist', function(data) {	
 				if (data) {
-					var data2=viewModel.broadcastHistory();
+					var data2=viewModel.broadcastHistory().concat(data).reverse();
 					
-                     			viewModel.broadcastHistory(data2.concat(data).reverse());
+                     			viewModel.broadcastHistory(data2);
+					var last = data2[0];
+					viewModel.message(last.content);
+					viewModel.clock(new Date());
+					viewModel.createQrCode();
 				};
 
 			
