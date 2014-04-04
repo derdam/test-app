@@ -39,7 +39,7 @@
 					<tr><th>Message</th><th>Received</th></tr>
 				</thead> -->
 				<tbody data-bind="foreach: broadcastHistory">
-					<tr data-bind="click: $root.onMsgClick">
+					<tr class="msghistrow" data-bind="click: $root.onMsgClick">
 						<td><div class=msgitem><div><span data-bind="text: content"></span></div>
 						<div><small><span data-bind="text: received"></span></small></div></div></td>
 					</tr>
