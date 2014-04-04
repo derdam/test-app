@@ -39,7 +39,7 @@
 					<tr><th>Message</th><th>Received</th></tr>
 				</thead> -->
 				<tbody data-bind="foreach: broadcastHistory">
-					<tr>
+					<tr data-bind="click: $root.onMsgClick">
 						<td><div class=msgitem><div><span data-bind="text: content"></span></div>
 						<div><small><span data-bind="text: received"></span></small></div></div></td>
 					</tr>
@@ -99,6 +99,16 @@
         };
 		
 		
+
+		viewModel.onMsgClick = function(data) {
+			// alert(data.content);
+			viewModel.message(data.content);
+			viewModel.clock(new Date());
+			viewModel.createQrCode();
+
+		};
+
+
 		viewModel.createQrCode = function() {
 		  viewModel.clock(new Date());
 		  
@@ -159,9 +169,13 @@
 			var data;
 			$.getJSON('../message/hist', function(data) {	
 				if (data) {
-					var data2=viewModel.broadcastHistory();
+					var data2=viewModel.broadcastHistory().concat(data).reverse();
 					
-                     			viewModel.broadcastHistory(data2.concat(data).reverse());
+                     			viewModel.broadcastHistory(data2);
+					var last = data2[0];
+					viewModel.message(last.content);
+					viewModel.clock(new Date());
+					viewModel.createQrCode();
 				};
 
 			
