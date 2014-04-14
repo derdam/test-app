@@ -1,0 +1,98 @@
+<html>
+	<head>
+    	<link href="css/style.css" rel="stylesheet" type="text/css">
+		<title>Index</title>
+	</head>
+	
+	<body>
+	
+ 		<!-- Send Message frame. A textbox and a send button. 
+		<div class="msgframe">
+			<div class="msghead"><strong>Broadcast message</strong></div>
+			<div class="msgcontent">
+				<input data-bind="value: msgToSend" /><button data-bind="click: wsTest">Send</button>
+				<button data-bind="click: wsTestData">Test data</button>
+			</div>
+		</div>
+		
+		-->
+		<!-- Result list: A table -->
+		 
+<!--> <-->
+		<div class="msgframe">
+			<div class="msghead"><strong>Query results</strong></div>
+<div>
+<table>
+    <thead>
+        <tr data-bind="foreach: columnNames">
+            <th> <span data-bind="text: $data.colname">ho.. Error!</span>
+
+            </th>
+        </tr>
+    </thead>
+    <tbody data-bind="foreach: items">
+        <tr data-bind="foreach: $parent.columnNames">
+            <td data-bind="text: $parent[$data.colname]"></td>
+        </tr>
+    </tbody>
+</table>
+</div>
+		</div>
+		
+	</body>
+
+</html>
+
+
+<!--Include JavaScripts for JQuery and Knockout.js <-->
+<script type='text/javascript', src='http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.js'></script>
+<script type='text/javascript', src='http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js'></script>
+
+<script type="text/javascript">
+	
+        // Here's my data model
+        var viewModel = function () {
+
+
+		var self=this;
+
+            	self.items=ko.observableArray();
+		self.columnNames = ko.computed(function() {
+			if (self.items().length === 0)
+            			return [];
+        		var props = [];
+        		var obj = self.items()[0];
+        		for (var name in obj)
+            			props.push({'colname':name, 'coltype':'string'});
+        		return props;
+  
+  		});
+
+
+		self.populate = function() {
+			self.items.push({
+    'Name': 'Preeet',
+    'Age': 27
+});
+		};		
+
+		
+        };
+	
+var vm = new viewModel();
+			
+        ko.applyBindings(vm); // This makes Knockout get to work
+	
+vm.populate();
+vm.items.push({
+    'Name': 'John',
+    'Age': 25
+});
+vm.items.push({
+    'Name': 'Morgan',
+    'Age': 26
+});
+
+		
+ </script>
+ 
