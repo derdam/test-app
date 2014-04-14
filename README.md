@@ -10,6 +10,8 @@ Once you have downloaded the project, go to the folder where app.js is located a
 
 20140414 - merged wr branch (Web Retrieval)
 
+	 - updated wr sample result list
+
 -----
 
 

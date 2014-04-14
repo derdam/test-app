@@ -70,29 +70,17 @@
 
 
 		self.populate = function() {
-			self.items.push({
-    'Name': 'Preeet',
-    'Age': 27
-});
+			self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Form A','Signed':'02.04.2014', 'Scanned':'03.04.2014', 'RunNr':'3454'});
 		};		
 
 		
         };
 	
-var vm = new viewModel();
+	var vm = new viewModel();
 			
         ko.applyBindings(vm); // This makes Knockout get to work
 	
-vm.populate();
-vm.items.push({
-    'Name': 'John',
-    'Age': 25
-});
-vm.items.push({
-    'Name': 'Morgan',
-    'Age': 26
-});
-
+	vm.populate();
 		
  </script>
  
