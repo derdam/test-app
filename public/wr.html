@@ -25,13 +25,13 @@
 <table>
     <thead>
         <tr data-bind="foreach: columnNames">
-            <th> <span data-bind="text: $data.colname">ho.. Error!</span>
+            <th class="msghead"> <span data-bind="text: $data.colname">ho.. Error!</span>
 
             </th>
         </tr>
     </thead>
     <tbody data-bind="foreach: items">
-        <tr data-bind="foreach: $parent.columnNames">
+        <tr class="msgitem" data-bind="foreach: $parent.columnNames">
             <td data-bind="text: $parent[$data.colname]"></td>
         </tr>
     </tbody>
