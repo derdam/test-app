@@ -4,7 +4,7 @@ var request = require('request');
 var qr = require('qr-image');
 var httpProxy = require('http-proxy');
 var app = express();
-
+var fs = require('fs');
 
 
 //app.use(express.compress());  // compress content
@@ -69,6 +69,40 @@ app.get('/qr/ts', function (req, res) {
 });
 
 
+/* pdf converter */
+var util = require('util'),
+		spawn = require('child_process').spawn; //,
+		cnv = spawn('convert', ['test.pdf', '-']);
+/*
+
+	
+	});
+
+*/
+// sample: return first page of a pdf in png:
+app.get('/pdf', function (req,res) {
+	console.log('GET /pdf '+req.query.data);
+
+	// check this for a better approach: http://docs.nodejitsu.com/articles/advanced/streams/how-to-use-stream-pipe
+
+
+	 res.type('png');
+	cnv = spawn('convert', ['-density','150','test.pdf[0]', 'test-0.png']);
+	
+	cnv.stdout.on('data', function(data) {
+		console.log('stdout: data received.');
+		//res.pipe(data);
+		
+	});
+	cnv.on('exit', function (code) {
+  		console.log('convert process exited with code ' + code);
+		if (code==0) {
+		  var rs = fs.createReadStream('test-0.png');
+		  rs.pipe(res);	
+		}
+	});
+
+});
 
 // sample: proxying service using 'request' module:
 app.get('/user', function (req, res) {
