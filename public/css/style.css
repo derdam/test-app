@@ -30,6 +30,29 @@ body {
 	
 }
 
+.reshead
+{
+	/* background-color:red; */
+	text-align: left;
+	width: 120px;
+	padding: 7px;
+	
+}
+
+.resrow
+{
+	/* background-color:green; */
+	
+	
+}
+
+.rescell
+{
+	/* background-color:blue; */
+padding: 7px;
+	
+}
+
 
 tr:hover {background-color: #E8E8E8}
 

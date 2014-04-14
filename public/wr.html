@@ -24,15 +24,15 @@
 <div>
 <table>
     <thead>
-        <tr data-bind="foreach: columnNames">
-            <th class="msghead"> <span data-bind="text: $data.colname">ho.. Error!</span>
+        <tr  data-bind="foreach: columnNames">
+            <th class="reshead"> <span data-bind="text: $data.colname">ho.. Error!</span>
 
             </th>
         </tr>
     </thead>
     <tbody data-bind="foreach: items">
-        <tr class="msgitem" data-bind="foreach: $parent.columnNames">
-            <td data-bind="text: $parent[$data.colname]"></td>
+        <tr class="resrow" data-bind="foreach: $parent.columnNames">
+            <td class="rescell" data-bind="text: $parent[$data.colname]"></td>
         </tr>
     </tbody>
 </table>
@@ -71,6 +71,9 @@
 
 		self.populate = function() {
 			self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Form A','Signed':'02.04.2014', 'Scanned':'03.04.2014', 'RunNr':'3454'});
+
+			self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Procuration','Signed':'03.04.2014', 'Scanned':'04.04.2014', 'RunNr':'5012'});
+			
 		};		
 
 		
