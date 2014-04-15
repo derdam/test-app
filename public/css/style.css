@@ -49,8 +49,8 @@ body {
 .rescell
 {
 	/* background-color:blue; */
-padding: 7px;
-	
+	padding: 7px;
+	white-space:nowrap;
 }
 
 
