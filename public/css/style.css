@@ -50,8 +50,10 @@ body {
 {
 	/* background-color:blue; */
 	padding: 7px;
-	white-space:nowrap;
+	/* white-space:nowrap; */
+	vertical-align: center;
 }
+
 
 
 tr:hover {background-color: #E8E8E8}

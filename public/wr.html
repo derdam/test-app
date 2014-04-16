@@ -20,25 +20,55 @@
 		 
 <h1>Web retrieval</h1>
 
+	<!-- result list -->
+
 		<div class="msgframe">
 			<div class="msghead"><strong>Query results</strong></div>
-<div>
-<table>
-    <thead>
-        <tr  data-bind="foreach: columnNames">
-            <th class="reshead"> <span data-bind="text: $data.colname">ho.. Error!</span>
-
-            </th>
-        </tr>
-    </thead>
-    <tbody data-bind="foreach: items">
-        <tr class="resrow" data-bind="foreach: $parent.columnNames">
-            <td class="rescell" data-bind="text: $parent[$data.colname]"></td>
-        </tr>
-    </tbody>
-</table>
-</div>
+			<div>
+			<table>
+			    <thead>
+			        <tr  data-bind="foreach: columnNames">
+			            <th class="reshead"> <span data-bind="text: $data.colname">Loading ..</span>
+			
+			            </th>
+			        </tr>
+			    </thead>
+			    <tbody data-bind="foreach: items">
+			        <tr class="resrow" data-bind="foreach: $parent.columnNames, click: $root.selRow">
+			            <td class="rescell">
+							<div data-bind="visible: $data.type!='url'"><span data-bind="text: $parent[$data.colname]"></span></div>
+							<div data-bind="visible: $data.type=='url'"><span data-bind="text: $parent[$data.colname]"></button></div>
+						</td>
+			        </tr>
+			    </tbody>
+			</table>
+			</div>
 		</div>
+
+	<!-- selected item detail-->
+
+		<div class="msgframe" data-bind="visible: $root.selectedRow()">
+			<div class="msghead"><strong>Details</strong></div>
+			<div class="msgcontent">
+				<span data-bind="text: $root.selectedRowJ"></span>
+				<div/>
+				<!-- vertical display of row properties -->
+				<table>
+					 <tbody data-bind="foreach: $root.columnNames">
+			        		<tr class="resrow">
+			            			<td class="rescell">
+								<div><span data-bind="text: $data.colname"></span></div>
+							</td>
+							<td class="rescell">
+								<div><span data-bind="text: $root.getRow($data.colname)"></span>ho</div>
+							</td>
+			        		</tr>
+			    		</tbody>
+				</table>
+			
+			</div>
+
+		</div> 
 		
 	</body>
 
@@ -63,24 +93,48 @@
             			return [];
         		var props = [];
         		var obj = self.items()[0];
-        		for (var name in obj)
-            			props.push({'colname':name, 'coltype':'string'});
+        		for (var name in obj) {
+				if (name==='_id') {
+					props.push({'colname':'_id', 'type':'url'});	
+				} else {
+					props.push({'colname':name, 'type':''});
+				}
+         		}
+			
         		return props;
-  
   		});
+
+		// observes the selected row in result list
+		self.selectedRow = ko.observable();
+		self.selectedRowJ = ko.computed(function() {
+			return  JSON.stringify(self.selectedRow());
+		});
 
 
 		self.populate = function() {
-			self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Form A','Signed':'02.04.2014', 'Scanned':'03.04.2014', 'RunNr':'3454'});
-			 self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Procuration','Signed':'03.04.2014', 'Scanned':'04.04.2014', 'RunNr':'5012'});
-			 self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Non-US Disclosure','Signed':'03.04.2014', 'Scanned':'04.04.2014', 'RunNr':'3654'});
-			 self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'E-Banking contract','Signed':'04.04.2014', 'Scanned':'05.04.2014', 'RunNr':'5097'});
+			self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Form A','Signed':'02.04.2014', 'Scanned':'03.04.2014', 'RunNr':'3454', '_id':0});
+			 self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Procuration','Signed':'03.04.2014', 'Scanned':'04.04.2014', 'RunNr':'5012', '_id':1});
+			 self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Non-US Disclosure','Signed':'03.04.2014', 'Scanned':'04.04.2014', 'RunNr':'3654', '_id':2});
+			 self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'E-Banking contract','Signed':'04.04.2014', 'Scanned':'05.04.2014', 'RunNr':'5097', '_id':3});
 						
 			// self.items.push({'Artist': 'Brahms','Album': 'Klavierkonzert 1', 'DocumentType':'MP3'});
 			// self.items.push({'Artist': 'Wagner','Album': 'Die Walkürie', 'DocumentType':'CD'});
 			// self.items.push({'Artist': 'Portishead','Album': 'Dummy', 'DocumentType':'WAV'});
 	
-		};		
+		};
+
+// Event handlers
+
+		// called when user selects a row in result list
+		self.selRow = function(row) {
+			self.selectedRow(row);
+			// alert(row._id.toString());
+		}
+
+		self.getRow = function(col) {
+
+			return col;
+		}
 
 		
         };
