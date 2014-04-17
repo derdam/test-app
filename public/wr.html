@@ -50,7 +50,7 @@
 		<div class="msgframe" data-bind="visible: $root.selectedRow()">
 			<div class="msghead"><strong>Details</strong></div>
 			<div class="msgcontent">
-				<span data-bind="text: $root.selectedRowJ"></span>
+				<!-- span data-bind="text: $root.getCol('_id')"></span -->
 				<div/>
 				<!-- vertical display of row properties -->
 				<table>
@@ -60,7 +60,7 @@
 								<div><span data-bind="text: $data.colname"></span></div>
 							</td>
 							<td class="rescell">
-								<div><span data-bind="text: $root.getRow($data.colname)"></span>ho</div>
+								<div><span data-bind="text: $root.getCol($data.colname)"></span></div>
 							</td>
 			        		</tr>
 			    		</tbody>
@@ -68,6 +68,16 @@
 			
 			</div>
 
+		</div>
+
+        <!-- selected document options --> 
+
+		<div class="msgframe" data-bind="visible: $root.selectedRow()">
+			<div class="msghead"><strong>Document</strong></div>
+			<div><button data-bind="click: $root.openDoc">Open</button></div>
+			<div>
+				<img  data-bind="attr:{src: getThumbUrl}" />
+			</div>
 		</div> 
 		
 	</body>
@@ -106,16 +116,28 @@
 
 		// observes the selected row in result list
 		self.selectedRow = ko.observable();
+
+		// returns the value of a column identified by name from the selected row in result list
+		self.getCol = function(col) {
+
+			var jso = self.selectedRow();
+			if (jso) {
+				var run = jso[col];
+				return run
+			}
+		};
+  
+/*
 		self.selectedRowJ = ko.computed(function() {
 			return  JSON.stringify(self.selectedRow());
 		});
-
+*/
 
 		self.populate = function() {
-			self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Form A','Signed':'02.04.2014', 'Scanned':'03.04.2014', 'RunNr':'3454', '_id':0});
-			 self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Procuration','Signed':'03.04.2014', 'Scanned':'04.04.2014', 'RunNr':'5012', '_id':1});
-			 self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Non-US Disclosure','Signed':'03.04.2014', 'Scanned':'04.04.2014', 'RunNr':'3654', '_id':2});
-			 self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'E-Banking contract','Signed':'04.04.2014', 'Scanned':'05.04.2014', 'RunNr':'5097', '_id':3});
+			self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Form A','Signed':'02.04.2014', 'Scanned':'03.04.2014', 'RunNr':'3454', '_id':1});
+			 self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Procuration','Signed':'03.04.2014', 'Scanned':'04.04.2014', 'RunNr':'5012', '_id':2});
+			 self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Non-US Disclosure','Signed':'03.04.2014', 'Scanned':'04.04.2014', 'RunNr':'3654', '_id':3});
+			 self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'E-Banking contract','Signed':'04.04.2014', 'Scanned':'05.04.2014', 'RunNr':'5097', '_id':4});
 						
 			// self.items.push({'Artist': 'Brahms','Album': 'Klavierkonzert 1', 'DocumentType':'MP3'});
 			// self.items.push({'Artist': 'Wagner','Album': 'Die Walkürie', 'DocumentType':'CD'});
@@ -128,16 +150,24 @@
 		// called when user selects a row in result list
 		self.selRow = function(row) {
 			self.selectedRow(row);
+			self.getThumbUrl();
 			// alert(row._id.toString());
+		};
+
+		self.openDoc = function() {
+			var id = self.getCol('_id');
+			if (id) {
+				window.location.href = "../pdf?density=96&page="+id.toString();	
+			}
 		}
 
-		self.getRow = function(col) {
-
-			return col;
-		}
-
-		
-        };
+		self.getThumbUrl = ko.computed(function() {
+			var id = self.getCol('_id');
+			if (id) {
+				return "../pdf?density=48&page="+id.toString();	
+			}
+		});
+     	};
 	
 	var vm = new viewModel();
 			

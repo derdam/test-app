@@ -69,20 +69,45 @@ app.get('/qr/ts', function (req, res) {
 });
 
 
-/* pdf converter
+/* pdf converter */
 var util = require('util'),
 		spawn = require('child_process').spawn; //,
 		cnv = spawn('convert', ['test.pdf', '-']);
 
 // sample: return first page of a pdf in png:
 app.get('/pdf', function (req,res) {
-	console.log('GET /pdf '+req.query.data);
+
+	// check if user requested a page in url query (i.e. ../pdf?page=1)
+	var reqPage = req.query['page'];
+
+	if (!reqPage) // requested page defaults to 0
+		reqPage=0;
+	else	reqPage=reqPage-1; // compensate 0-based page number
+
+
+	if (reqPage<0) // page number guard
+		reqPage=0;
+
+	// check if user requested a density in url query (i.e. ../pdf?density=96)
+	var reqDens = req.query['density'];
+
+	if (!reqDens) // requested density defaults to 75
+		reqDens=75;
+
+	if (reqDens<1)	// density guard
+		reqDens=1;
+	if (reqDens>1200)
+		reqDens=1200;
+			
+	console.log('GET /pdf?page='+reqPage+'&density='+reqDens);
 
 	// check this for a better approach: http://docs.nodejitsu.com/articles/advanced/streams/how-to-use-stream-pipe
 
 
 	 res.type('png');
-	cnv = spawn('convert', ['-density','150','test.pdf[0]', 'test-0.png']);
+	var pIn = "test.pdf["+reqPage.toString()+"]";
+	var pOut = "test-"+reqPage.toString()+".png";
+	cnv = spawn('convert', ['-density',reqDens.toString(),pIn, pOut]);
 	
 	cnv.stdout.on('data', function(data) {
 		console.log('stdout: data received.');
@@ -92,14 +117,14 @@ app.get('/pdf', function (req,res) {
 	cnv.on('exit', function (code) {
   		console.log('convert process exited with code ' + code);
 		if (code==0) {
-		  var rs = fs.createReadStream('test-0.png');
+		  var rs = fs.createReadStream(pOut);
 		  rs.pipe(res);	
 		}
 	});
 
 });
 
- */
+
 
 // sample: proxying service using 'request' module:
 app.get('/user', function (req, res) {
