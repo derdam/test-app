@@ -73,11 +73,13 @@
         <!-- selected document options --> 
 
 		<div class="msgframe" data-bind="visible: $root.selectedRow()">
-			<div class="msghead"><strong>Document</strong></div>
-			<div><button data-bind="click: $root.openDoc">Open</button></div>
+			<div class="msghead"><strong>Preview</strong></div>
 			<div>
-				<img  data-bind="attr:{src: getThumbUrl}" />
+				<img  data-bind="click: $root.openDoc, attr:{src: getThumbUrl}" />
+				<img  data-bind="click: $root.openDoc1, attr:{src: getThumbUrl1}" />
 			</div>
+<div><button data-bind="click: $root.openDoc">Open</button></div>
+			
 		</div> 
 		
 	</body>
@@ -161,9 +163,26 @@
 			}
 		}
 
+
+		self.openDoc1 = function() {
+			var id = self.getCol('_id');
+			if (id) {
+				id=id+1;
+				window.location.href = "../pdf?density=96&page="+id.toString();	
+			}
+		}
+
 		self.getThumbUrl = ko.computed(function() {
 			var id = self.getCol('_id');
 			if (id) {
+				return "../pdf?density=48&page="+id.toString();	
+			}
+		});
+
+		self.getThumbUrl1 = ko.computed(function() {
+			var id = self.getCol('_id');
+			if (id) {
+				id=id+1;
 				return "../pdf?density=48&page="+id.toString();	
 			}
 		});
