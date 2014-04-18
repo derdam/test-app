@@ -6,19 +6,18 @@ var httpProxy = require('http-proxy');
 var app = express();
 var fs = require('fs');
 
-
-//app.use(express.compress());  // compress content
-//app.use(express.cache());
+// app.use(express.compress());  // compress content
+// app.use(express.cache()); // cache content
 
 // Server setup, including websocket support */
 var host='' //'192.168.1.101'; // address that clients use to connect to this server
 var port = 8080; // port that clients use to connect to this server
 
 var http = require('http');
-var server = http.createServer(app).listen(port);
+var server = http.createServer(app); //.listen(port);
 
 // https setup
-/*
+
 var https = require('https');
 var fs = require('fs'); // required to read cert and key files on filesystem
 
@@ -29,7 +28,7 @@ var httpsOpts = {
 
 https.createServer(httpsOpts, app).listen(8081);
 console.log('Server running, listening on port 8081 for https.');
-*/
+
 
 
 // Web socket setup
