@@ -80,7 +80,7 @@
 				<img  data-bind="click: $root.closeViewer, attr:{src: getThumbUrl}" />
 				<img  data-bind="visible: $root.viewerPages()>1, click: $root.openDoc1, attr:{src: getThumbUrl1}" />
 			</div>
-<div><button data-bind="click: $root.openDoc">Open</button></div>
+<div><button data-bind="click: $root.openDoc">Open</button><button data-bind="click: $root.perMail">Send to my mail</button></div>
 			
 		</div> 
 		
@@ -212,7 +212,15 @@
 				return "../pdf?density="+self.viewerDensityP()+"&page="+id.toString();	
 			}
 		});
+	
+		self.perMail = function() {
+			$.get("permail");
+		}
+	
      	};
+	
+	
+	
 	
 	var vm = new viewModel();
 			vm.viewerVisible(false);

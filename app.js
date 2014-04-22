@@ -14,7 +14,7 @@ var host='' //'192.168.1.101'; // address that clients use to connect to this se
 var port = 8080; // port that clients use to connect to this server
 
 var http = require('http');
-var server = http.createServer(app); //.listen(port);
+var server = http.createServer(app).listen(port);
 
 // https setup
 
@@ -119,6 +119,59 @@ app.get('/pdf', function (req,res) {
 		  var rs = fs.createReadStream(pOut);
 		  rs.pipe(res);	
 		}
+	});
+
+});
+
+// sample: simple mailer
+var nodemailer = require("nodemailer");
+
+// create reusable transport method (opens pool of SMTP connections)
+var smtpTransport = nodemailer.createTransport("SMTP",{
+    service: "Gmail",
+    auth: {
+        user: "damien.derbes@gmail.com",
+        pass: "glouglou2012" // TODO: de-hard code and change e-mail password on this account !!
+    }
+});
+
+app.get('/permail', function (req, res) {
+
+	console.log("creating qrindex.png for document");
+	var qrcode = qr.image('data:'+'test.pdf', {type:'png'});
+	
+	// setup e-mail data with unicode symbols
+	var mailOptions = {
+	    from: "Xanthos Web Retrieval", // sender address
+	    to: "damien.derbes@gmail.com", // ", // list of receivers
+	    subject: "Xanthos Web Retrieval - document delivery", // Subject line
+	    text: "1 Document in attachment.", // plaintext body
+	    // html: "<b>Hello world ✔</b>" // html body
+	    attachments: [
+	    	{   // file on disk as an attachment
+            	fileName: "test.pdf",
+            	filePath: "test.pdf" // stream this file
+        	},
+        	{   // use URL as an attachment
+            	fileName: "qrindex.png",
+            	filePath: "qrindex.png"
+        	}
+	    ]
+	}
+	
+	   console.log("Sending test.pdf per mail..");
+	// send mail with defined transport object
+	smtpTransport.sendMail(mailOptions, function(error, response){
+	    if(error){
+	        console.log(error);
+	        res.send("ok");
+	    }else{
+	    	res.send("error "+response.message);
+	        console.log("Message sent: " + response.message);
+	    }
+	
+	    // if you don't want to use this transport object anymore, uncomment following line
+	    //smtpTransport.close(); // shut down the connection pool, no more messages
 	});
 
 });
