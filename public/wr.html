@@ -18,11 +18,12 @@
 		-->
 		<!-- Result list: A table -->
 		 
-<h1>Web retrieval</h1>
+
 
 	<!-- result list -->
-
-		<div class="msgframe">
+	  <div data-bind="visible:$root.viewerVisible()==false">
+		<h1>Web retrieval</h1>
+		<div class="msgframe" >
 			<div class="msghead"><strong>Query results</strong></div>
 			<div>
 			<table>
@@ -44,7 +45,7 @@
 			</table>
 			</div>
 		</div>
-
+	
 	<!-- selected item detail-->
 
 		<div class="msgframe" data-bind="visible: $root.selectedRow()">
@@ -69,14 +70,15 @@
 			</div>
 
 		</div>
-
+	</div>
+</div>
         <!-- selected document options --> 
 
 		<div class="msgframe" data-bind="visible: $root.selectedRow()">
-			<div class="msghead"><strong>Preview</strong></div>
+			<div class="msghead" data-bind="click: $root.closeViewer, visible:$root.viewerVisible()==false"><strong>Preview</strong></div>
 			<div>
-				<img  data-bind="click: $root.openDoc, attr:{src: getThumbUrl}" />
-				<img  data-bind="click: $root.openDoc1, attr:{src: getThumbUrl1}" />
+				<img  data-bind="click: $root.closeViewer, attr:{src: getThumbUrl}" />
+				<img  data-bind="visible: $root.viewerPages()>1, click: $root.openDoc1, attr:{src: getThumbUrl1}" />
 			</div>
 <div><button data-bind="click: $root.openDoc">Open</button></div>
 			
@@ -99,7 +101,24 @@
 
 		var self=this;
 
-            	self.items=ko.observableArray();
+		// tracks viewer visibility	
+		self.viewerVisible = ko.observable();
+	
+		// viewer resolution (in dpi). defaults ton 48 on startup.
+		//self.viewerDensity = ko.observable(48);
+		
+		// viewer pages per frame (1-2). defaults to 2 on startup
+		self.viewerPages = ko.observable(2);
+	
+		self.viewerDensityP = ko.computed(function() {
+			return 48; // self.viewerPages();
+		});
+	
+	
+		// tracks resultlist items
+        self.items = ko.observableArray();
+	
+		// track column names based on 1st item in items
 		self.columnNames = ko.computed(function() {
 			if (self.items().length === 0)
             			return [];
@@ -159,23 +178,30 @@
 		self.openDoc = function() {
 			var id = self.getCol('_id');
 			if (id) {
-				window.location.href = "../pdf?density=96&page="+id.toString();	
+				window.location.href = "../pdf?density=128&page="+id.toString();	
 			}
 		}
 
 
+		self.closeViewer = function() {
+			self.viewerVisible(false);
+			self.viewerPages(2);
+		}
+	
 		self.openDoc1 = function() {
-			var id = self.getCol('_id');
+			self.viewerVisible(true);
+			self.viewerPages(1);
+			/* var id = self.getCol('_id');
 			if (id) {
 				id=id+1;
 				window.location.href = "../pdf?density=96&page="+id.toString();	
-			}
+			} */
 		}
 
 		self.getThumbUrl = ko.computed(function() {
 			var id = self.getCol('_id');
 			if (id) {
-				return "../pdf?density=48&page="+id.toString();	
+				return "../pdf?density="+self.viewerDensityP()+"&page="+id.toString();	
 			}
 		});
 
@@ -183,13 +209,13 @@
 			var id = self.getCol('_id');
 			if (id) {
 				id=id+1;
-				return "../pdf?density=48&page="+id.toString();	
+				return "../pdf?density="+self.viewerDensityP()+"&page="+id.toString();	
 			}
 		});
      	};
 	
 	var vm = new viewModel();
-			
+			vm.viewerVisible(false);
         ko.applyBindings(vm); // This makes Knockout get to work
 	
 	vm.populate();
