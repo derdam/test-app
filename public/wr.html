@@ -48,7 +48,7 @@
 	
 	<!-- selected item detail-->
 
-		<div class="msgframe" data-bind="visible: $root.selectedRow()">
+		<div class="msgframe" data-bind="visible: $root.selectedRow()==false">
 			<div class="msghead"><strong>Details</strong></div>
 			<div class="msgcontent">
 				<!-- span data-bind="text: $root.getCol('_id')"></span -->
@@ -75,14 +75,16 @@
         <!-- selected document options --> 
 
 		<div class="msgframe" data-bind="visible: $root.selectedRow()">
-			<div class="msghead" data-bind="click: $root.closeViewer, visible:$root.viewerVisible()==false"><strong>Preview</strong></div>
-			<div>
-				<img  data-bind="click: $root.closeViewer, attr:{src: getThumbUrl}" />
-				<img  data-bind="visible: $root.viewerPages()>1, click: $root.openDoc1, attr:{src: getThumbUrl1}" />
+			<div class="msghead" data-bind="click: $root.closeViewer, visible:$root.viewerVisible()==false"><strong>Preview  </strong>
+				<span><button data-bind="click: $root.zoomOut">-</button><span data-bind="text: $root.viewerDensityP"></span>.0</span><span><button data-bind="click: $root.zoomIn">+</button></span>
+			</div>
+			<div class="preview">
+				<img  class="previewPage" data-bind="click: $root.closeViewer, attr:{src: getThumbUrl}" />
+				<img  class="previewPage" data-bind="visible: $root.viewerPages()>1, click: $root.openDoc1, attr:{src: getThumbUrl1}" />
 			</div>
 <div><button data-bind="click: $root.openDoc">Open</button><button data-bind="click: $root.perMail">Send to my mail</button></div>
-			
-		</div> 
+<div><span data-bind="text: $root.viewerDensityP"></span></div>			
+		</div>
 		
 	</body>
 
@@ -103,15 +105,24 @@
 
 		// tracks viewer visibility	
 		self.viewerVisible = ko.observable();
-	
+	  
 		// viewer resolution (in dpi). defaults ton 48 on startup.
 		//self.viewerDensity = ko.observable(48);
+	
+	
+	
+		self.viewerDensityF = ko.observable(1.0);
 		
 		// viewer pages per frame (1-2). defaults to 2 on startup
 		self.viewerPages = ko.observable(2);
 	
 		self.viewerDensityP = ko.computed(function() {
-			return 48; // self.viewerPages();
+			// return 48; // self.viewerPages();
+			if (self.viewerPages()==2) {
+		    	return Math.round(48 * self.viewerDensityF());
+			} else {
+				return Math.round(128 * self.viewerDensityF());
+		    }
 		});
 	
 	
@@ -168,6 +179,26 @@
 
 // Event handlers
 
+
+		// called when user decrease resolution in viewer
+
+		self.zoomOut = function() {
+			var dpi = self.viewerDensityF();
+			if (dpi > 0.2) {
+				dpi = dpi - 0.1;
+				self.viewerDensityF(dpi);	
+			}
+		};
+	
+		self.zoomIn = function() {
+			var dpi = self.viewerDensityF();
+			if (dpi < 10.0) {
+				dpi = dpi + 0.1;
+				self.viewerDensityF(dpi);	
+			}
+		};
+
+	
 		// called when user selects a row in result list
 		self.selRow = function(row) {
 			self.selectedRow(row);
@@ -178,7 +209,7 @@
 		self.openDoc = function() {
 			var id = self.getCol('_id');
 			if (id) {
-				window.location.href = "../pdf?density=128&page="+id.toString();	
+				window.location.href = "../pdf?density=196&page="+id.toString();	
 			}
 		}
 
@@ -206,10 +237,12 @@
 		});
 
 		self.getThumbUrl1 = ko.computed(function() {
-			var id = self.getCol('_id');
-			if (id) {
-				id=id+1;
-				return "../pdf?density="+self.viewerDensityP()+"&page="+id.toString();	
+			if (self.viewerPages()>1) {
+				var id = self.getCol('_id');
+				if (id) {
+					id=id+1;
+					return "../pdf?density="+self.viewerDensityP()+"&page="+id.toString();	
+				}
 			}
 		});
 	
