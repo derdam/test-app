@@ -97,8 +97,16 @@ app.get('/pdf', function (req,res) {
 		reqDens=1;
 	if (reqDens>1200)
 		reqDens=1200;
+	
+	// check if user requested a quality factor in url query (i.e. ../pdf?quality=70)
+	var reqQual = req.query['quality'];
+	if (!reqQual) // quality defaults to 80	
+		reqQual=80;
+		
+				
+	
 			
-	console.log('GET /pdf?page='+reqPage+'&density='+reqDens);
+	console.log('GET /pdf?page='+reqPage+'&density='+reqDens+'&quality='+reqQual);
 
 	// check this for a better approach: http://docs.nodejitsu.com/articles/advanced/streams/how-to-use-stream-pipe
 
@@ -106,7 +114,7 @@ app.get('/pdf', function (req,res) {
 	 res.type('png');
 	var pIn = "test.pdf["+reqPage.toString()+"]";
 	var pOut = "test-"+reqPage.toString()+".png";
-	cnv = spawn('convert', ['-density',reqDens.toString(),pIn, pOut]);
+	cnv = spawn('convert', ['-density',reqDens.toString(), '-quality',reqQual,pIn, pOut]);
 	
 	cnv.stdout.on('data', function(data) {
 		console.log('stdout: data received.');

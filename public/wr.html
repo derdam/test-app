@@ -76,7 +76,8 @@
 
 		<div class="msgframe" data-bind="visible: $root.selectedRow()">
 			<div class="msghead" data-bind="click: $root.closeViewer, visible:$root.viewerVisible()==false"><strong>Preview  </strong>
-				<span><button data-bind="click: $root.zoomOut">-</button><span data-bind="text: $root.viewerDensityP"></span>.0</span><span><button data-bind="click: $root.zoomIn">+</button></span>
+				<span><button data-bind="click: $root.zoomOut">-</button><span data-bind="text: $root.viewerDensityP"></span> dpi</span><span><button data-bind="click: $root.zoomIn">+</button></span>
+				&nbsp Quality &nbsp<span><button data-bind="click: $root.viewerQualityL">lo</button><span data-bind="text: $root.viewerQuality"></span></span><span><button data-bind="click: $root.viewerQualityH">hi</button></span>
 			</div>
 			<div class="preview">
 				<img  class="previewPage" data-bind="click: $root.closeViewer, attr:{src: getThumbUrl}" />
@@ -126,6 +127,20 @@
 		});
 	
 	
+		// viewer rendering quality
+		self.viewerQuality = ko.observable(80);
+	
+	    // called when user selects low quality rendering in viewer
+		self.viewerQualityL = function() {
+			self.viewerQuality(20);
+		}
+	
+	 	// called when user selects low quality rendering in viewer
+		self.viewerQualityH = function() {
+			self.viewerQuality(80);
+		}
+	
+		
 		// tracks resultlist items
         self.items = ko.observableArray();
 	
@@ -232,7 +247,7 @@
 		self.getThumbUrl = ko.computed(function() {
 			var id = self.getCol('_id');
 			if (id) {
-				return "../pdf?density="+self.viewerDensityP()+"&page="+id.toString();	
+				return "../pdf?density="+self.viewerDensityP()+"&page="+id.toString()+'&quality='+self.viewerQuality();	
 			}
 		});
 
@@ -241,7 +256,7 @@
 				var id = self.getCol('_id');
 				if (id) {
 					id=id+1;
-					return "../pdf?density="+self.viewerDensityP()+"&page="+id.toString();	
+					return "../pdf?density="+self.viewerDensityP()+"&page="+id.toString()+'&quality='+self.viewerQuality();	
 				}
 			}
 		});
