@@ -1,7 +1,7 @@
 <html>
 	<head>
     	<link href="css/style.css" rel="stylesheet" type="text/css">
-		<title>Index</title>
+		<title>Web retrieval</title>
 	</head>
 	
 	<body>
@@ -22,10 +22,10 @@
 
 	<!-- result list -->
 	  <div data-bind="visible:$root.viewerVisible()==false">
-		<h1>Web retrieval</h1>
+		<!-- div class="banner"><h1>Web retrieval</h1></div -->
 		<div class="msgframe" >
 			<div class="msghead"><strong>Query results</strong></div>
-			<div>
+			
 			<table>
 			    <thead>
 			        <tr  data-bind="foreach: columnNames">
@@ -43,8 +43,8 @@
 			        </tr>
 			    </tbody>
 			</table>
-			</div>
-		</div>
+			
+		
 	
 	<!-- selected item detail-->
 
@@ -83,7 +83,7 @@
 				<img  class="previewPage" data-bind="click: $root.closeViewer, attr:{src: getThumbUrl}" />
 				<img  class="previewPage" data-bind="visible: $root.viewerPages()>1, click: $root.openDoc1, attr:{src: getThumbUrl1}" />
 			</div>
-<div><button data-bind="click: $root.openDoc">Open</button><button data-bind="click: $root.perMail">Send to my mail</button></div>
+<div><button data-bind="click: $root.openDoc">Open</button><button data-bind="click: $root.perMail">Send me</button></div>
 <div><span data-bind="text: $root.viewerDensityP"></span></div>			
 		</div>
 		

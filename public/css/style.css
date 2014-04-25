@@ -2,6 +2,10 @@ body {
 	font-family: "arial", "helvetica", "sans-serif";
 }
 
+.banner {
+	background-color:  #E8E8E8;
+}
+
 .msgframe {
 	width:100%;
 	padding:00px;
@@ -27,6 +31,7 @@ body {
 	padding-left:2px;
 	background-color: gray;
 }
+
 
 .previewPage {
 	background-color: white;
