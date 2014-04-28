@@ -71,7 +71,7 @@ app.get('/qr/ts', function (req, res) {
 /* pdf converter */
 var util = require('util'),
 		spawn = require('child_process').spawn; //,
-		cnv = spawn('convert', ['test.pdf', '-']);
+		//cnv = spawn('convert', ['test.pdf', '-']);
 
 // sample: return first page of a pdf in png:
 app.get('/pdf', function (req,res) {

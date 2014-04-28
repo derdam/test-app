@@ -84,4 +84,8 @@ p.msgcontent {gh
 
 
 
-
+.pageNum 
+{	width: 5%;
+	text-align: center;
+	/* background-color: red; */
+}

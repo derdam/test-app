@@ -1,0 +1,52 @@
+<html>
+	<head>
+    	<link href="css/style.css" rel="stylesheet" type="text/css">
+		<title>Viewer</title>
+	</head>
+	
+	<body>
+	
+ 		<!-- Send Message frame. A textbox and a send button. -->
+		<div class="msgframe">
+			<div class="msghead"><button data-bind="click: prevPage"><</button><input class="pageNum" data-bind="value: viewPage" /><button data-bind="click: nextPage">></button></div>
+			
+		</div>
+		
+		
+	</body>
+
+</html>
+
+
+<!--Include JavaScripts for JQuery and Knockout.js <-->
+<script type='text/javascript' src='js/jquery.js'></script>
+<script type='text/javascript' src='js/knockout-min.js'></script>
+
+<script type="text/javascript">
+	
+        // Here's my data model
+   var viewModel = function () {
+		var self=this;
+	
+		self.viewPage = ko.observable(1);
+	
+		self.nextPage = function() {
+			self.viewPage(self.viewPage()+1);
+		};
+	
+		self.prevPage = function() {
+			var page = self.viewPage();
+			if (page>1)
+				page=page-1;
+			self.viewPage(page);
+		};
+	
+	
+	};
+
+	var vm = new viewModel();
+    ko.applyBindings(vm); // This makes Knockout get to work
+		
+
+ </script>
+ 
