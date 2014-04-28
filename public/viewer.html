@@ -9,7 +9,7 @@
  		<!-- Send Message frame. A textbox and a send button. -->
 		<div class="msgframe">
 			<div class="msghead"><button data-bind="click: prevPage"><</button><input class="pageNum" data-bind="value: viewPage" /><button data-bind="click: nextPage">></button></div>
-			
+			<img data-bind="attr:{src: viewUrl}"></img>
 		</div>
 		
 		
@@ -28,12 +28,20 @@
    var viewModel = function () {
 		var self=this;
 	
+		// tracks viewed page number
 		self.viewPage = ko.observable(1);
 	
+		// observes view Url
+		self.viewUrl = ko.computed(function() {
+			return "../pdf?page="+self.viewPage()+"&density=132";
+		});
+	
+		// goes to next page
 		self.nextPage = function() {
 			self.viewPage(self.viewPage()+1);
 		};
 	
+		// goes to previous page
 		self.prevPage = function() {
 			var page = self.viewPage();
 			if (page>1)
