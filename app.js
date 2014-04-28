@@ -126,6 +126,8 @@ app.get('/pdf', function (req,res) {
 		if (code==0) {
 		  var rs = fs.createReadStream(pOut);
 		  rs.pipe(res);	
+		} else {
+			res.end();
 		}
 	});
 

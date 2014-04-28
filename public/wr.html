@@ -80,9 +80,10 @@
 				&nbsp Quality &nbsp<span><button data-bind="click: $root.viewerQualityL">lo</button><span data-bind="text: $root.viewerQuality"></span></span><span><button data-bind="click: $root.viewerQualityH">hi</button></span>
 			</div>
 			<div class="preview">
-				<img  class="previewPage" data-bind="click: $root.closeViewer, attr:{src: getThumbUrl}" />
-				<img  class="previewPage" data-bind="visible: $root.viewerPages()>1, click: $root.openDoc1, attr:{src: getThumbUrl1}" />
+				<img  class="previewPage" data-bind="click: $root.closeViewer, attr:{src: getThumbUrl0}" />
+				<img  class="previewPage" data-bind="attr:{src: getThumbUrl1}" />
 			</div>
+			
 <div><button data-bind="click: $root.openDoc">Open</button><button data-bind="click: $root.perMail">Send me</button></div>
 <div><span data-bind="text: $root.viewerDensityP"></span></div>			
 		</div>
@@ -107,27 +108,16 @@
 		// tracks viewer visibility	
 		self.viewerVisible = ko.observable();
 	  
-		// viewer resolution (in dpi). defaults ton 48 on startup.
-		//self.viewerDensity = ko.observable(48);
-	
-	
-	
+		// viewer density factor, for preview and view
 		self.viewerDensityF = ko.observable(1.0);
 		
-		// viewer pages per frame (1-2). defaults to 2 on startup
-		self.viewerPages = ko.observable(2);
-	
+		// preview thumbnails density
 		self.viewerDensityP = ko.computed(function() {
-			// return 48; // self.viewerPages();
-			if (self.viewerPages()==2) {
-		    	return Math.round(48 * self.viewerDensityF());
-			} else {
-				return Math.round(128 * self.viewerDensityF());
-		    }
+			return Math.round(24 * self.viewerDensityF());
 		});
 	
 	
-		// viewer rendering quality
+		// viewer rendering quality (80 seems a good time/size compromsise)
 		self.viewerQuality = ko.observable(80);
 	
 	    // called when user selects low quality rendering in viewer
@@ -217,10 +207,9 @@
 		// called when user selects a row in result list
 		self.selRow = function(row) {
 			self.selectedRow(row);
-			self.getThumbUrl();
-			// alert(row._id.toString());
 		};
 
+	    // called when user clicks the 'open' button in preview pane	
 		self.openDoc = function() {
 			var id = self.getCol('_id');
 			if (id) {
@@ -229,35 +218,39 @@
 		}
 
 
+		// called when the user closes the viewer	
 		self.closeViewer = function() {
 			self.viewerVisible(false);
-			self.viewerPages(2);
 		}
 	
-		self.openDoc1 = function() {
-			self.viewerVisible(true);
-			self.viewerPages(1);
-			/* var id = self.getCol('_id');
-			if (id) {
-				id=id+1;
-				window.location.href = "../pdf?density=96&page="+id.toString();	
-			} */
-		}
+	/*
+	
+		self.docViewPage = ko.observable(1);
+	
+		self.getDocViewUrl = ko.computed(function() {
+			
+						return "../pdf?density=150"+"&page="+self.docViewPage()+'&quality='+self.viewerQuality();	
 
-		self.getThumbUrl = ko.computed(function() {
+		});
+	*/
+	
+		self.getThumbUrl = function(page) {
+			return "../pdf?density="+self.viewerDensityP()+"&page="+page.toString()+'&quality='+self.viewerQuality();	
+		}
+	
+
+		self.getThumbUrl0 = ko.computed(function() {
 			var id = self.getCol('_id');
 			if (id) {
-				return "../pdf?density="+self.viewerDensityP()+"&page="+id.toString()+'&quality='+self.viewerQuality();	
+				// return "../pdf?density="+self.viewerDensityP()+"&page="+id.toString()+'&quality='+self.viewerQuality();	
+				return self.getThumbUrl(id);
 			}
 		});
 
 		self.getThumbUrl1 = ko.computed(function() {
-			if (self.viewerPages()>1) {
-				var id = self.getCol('_id');
-				if (id) {
-					id=id+1;
-					return "../pdf?density="+self.viewerDensityP()+"&page="+id.toString()+'&quality='+self.viewerQuality();	
-				}
+			var id = self.getCol('_id');
+			if (id) {
+				return self.getThumbUrl(id + 1);
 			}
 		});
 	
