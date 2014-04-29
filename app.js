@@ -73,6 +73,8 @@ var util = require('util'),
 		spawn = require('child_process').spawn; //,
 		//cnv = spawn('convert', ['test.pdf', '-']);
 
+
+
 // sample: return first page of a pdf in png:
 app.get('/pdf', function (req,res) {
 
@@ -102,9 +104,6 @@ app.get('/pdf', function (req,res) {
 	var reqQual = req.query['quality'];
 	if (!reqQual) // quality defaults to 80	
 		reqQual=80;
-		
-				
-	
 			
 	console.log('GET /pdf?page='+reqPage+'&density='+reqDens+'&quality='+reqQual);
 
@@ -132,9 +131,22 @@ app.get('/pdf', function (req,res) {
   		console.log('convert process exited with code ' + code);
 		if (code==0) {
 		  var rs = fs.createReadStream(pOut);
+		  
+		  // ask stream to remove sent file when pipe is completed.
+		  rs.on('end', function() {
+			 console.log('Cleaning '+pOut+' ..');
+			 fs.unlink(pOut, function (err) {
+  				if (!err)
+  					console.log('successfully deleted.\n');
+  					// else: forget deliberatly.
+			  });
+		  });
+
 		  rs.pipe(res);	
 		} else {
 			res.end();
+			 fs.unlink(pOut);
+  			
 		}
 	});
 
