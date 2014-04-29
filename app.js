@@ -112,10 +112,17 @@ app.get('/pdf', function (req,res) {
 
 
 	 res.type('png');
-	var pIn = "test.pdf["+reqPage.toString()+"]";
-	var pOut = "test-"+reqPage.toString()+".png";
-	cnv = spawn('convert', ['-density',reqDens.toString(), '-quality',reqQual,pIn, pOut]);
+	 
+	// input file for convert command
+	//var pIn = "test.pdf["+reqPage.toString()+"]";
 	
+	// input file for pdfdraw command
+	var pIn = "test.pdf";
+	
+	var pOut = "test-"+reqPage.toString()+".png";
+	// ghostscript, via convert: cnv = spawn('convert', ['-density',reqDens.toString(), '-quality',reqQual,pIn, pOut]);
+	// pdfdraw (mu-pdftools)
+	cnv = spawn('pdfdraw', ['-g','-r',reqDens,'-o',pOut,pIn,reqPage+1]);
 	cnv.stdout.on('data', function(data) {
 		console.log('stdout: data received.');
 		//res.pipe(data);

@@ -8,10 +8,14 @@
 	
  		<!-- Send Message frame. A textbox and a send button. -->
 		<div class="msgframe">
-			<div class="msghead"><button data-bind="click: prevPage"><</button><input class="pageNum" data-bind="value: viewPage" /><button data-bind="click: nextPage">></button></div>
-			<img data-bind="attr:{src: viewUrl}"></img>
-		</div>
+			<div class="msghead">
+				<button data-bind="click: prevPage"><</button><input class="pageNum" data-bind="value: viewPage" /><button data-bind="click: nextPage">></button>
+				<span><button data-bind="click: $root.zoomOut">-</button><span data-bind="text: $root.viewerDensityP"></span> dpi</span><span><button data-bind="click: $root.zoomIn">+</button></span>
 		
+		</div><img data-bind="attr:{src: viewUrl}"></img>
+			
+		</div>
+		<span data-bind="text: viewerDensityP()"></span>
 		
 	</body>
 
@@ -29,11 +33,19 @@
 		var self=this;
 	
 		// tracks viewed page number
-		self.viewPage = ko.observable(1);
+		self.viewPage = ko.observable(1);	
+	
+		self.viewerDensityF = ko.observable(1.0);
+		// viewer density
+		self.viewerDensityP = ko.computed(function() {
+			 return Math.round(128 * self.viewerDensityF());
+			//return 150;
+		});
+	
 	
 		// observes view Url
 		self.viewUrl = ko.computed(function() {
-			return "../pdf?page="+self.viewPage()+"&density=132";
+			return "../pdf?page="+self.viewPage()+"&density="+self.viewerDensityP();
 		});
 	
 		// goes to next page
@@ -49,6 +61,24 @@
 			self.viewPage(page);
 		};
 	
+		// zoom in
+			self.zoomOut = function() {
+			var dpi = self.viewerDensityF();
+			if (dpi > 0.2) {
+				dpi = dpi - 0.1;
+				self.viewerDensityF(dpi);	
+			}
+		};
+	
+		self.zoomIn = function() {
+			var dpi = self.viewerDensityF();
+			if (dpi < 10.0) {
+				dpi = dpi + 0.1;
+				self.viewerDensityF(dpi);	
+			}
+		};
+
+		
 	
 	};
 
