@@ -11,12 +11,14 @@
 			<div class="msghead">
 				<button data-bind="click: prevPage"><</button><input class="pageNum" data-bind="value: viewPage" /><button data-bind="click: nextPage">></button>
 				<span><button data-bind="click: $root.zoomOut">-</button><span data-bind="text: $root.viewerDensityP"></span> dpi</span><span><button data-bind="click: $root.zoomIn">+</button></span>
-		
+				<span><button data-bind="click: $root.rotL">rotl</button><span data-bind="text: rotation()"></span>°<button data-bind="click: $root.rotR">rotr</button><span>
 		</div><img data-bind="attr:{src: viewUrl}"></img>
 			
 		</div>
-		<span data-bind="text: viewerDensityP()"></span>
-		
+		<!--
+		<span data-bind="text: viewerDensityP()"></span>dip&nbsp
+		<span data-bind="text: rotation()"></span>°
+		-->
 	</body>
 
 </html>
@@ -32,22 +34,42 @@
    var viewModel = function () {
 		var self=this;
 	
-		// tracks viewed page number
+		// observes viewed page number
 		self.viewPage = ko.observable(1);	
 	
 		self.viewerDensityF = ko.observable(1.0);
-		// viewer density
+		// observes viewer density
 		self.viewerDensityP = ko.computed(function() {
 			 return Math.round(128 * self.viewerDensityF());
 			//return 150;
 		});
 	
+		// observes rotation angle
+		self.rotation = ko.observable(0);
 	
 		// observes view Url
 		self.viewUrl = ko.computed(function() {
-			return "../pdf?page="+self.viewPage()+"&density="+self.viewerDensityP();
+			return "../pdf?page="+self.viewPage()+"&density="+self.viewerDensityP()+"&rotate="+self.rotation();
 		});
 	
+		
+		self.rotR = function() {
+			var angle = self.rotation();
+			angle = angle + 90;
+			if (angle>360)
+				angle=0;
+			self.rotation(angle);
+		};
+	
+		
+		self.rotL = function() {
+			var angle = self.rotation();
+			angle = angle - 90;
+			if (angle<-360)
+				angle=0;
+			self.rotation(angle);
+		};
+		
 		// goes to next page
 		self.nextPage = function() {
 			self.viewPage(self.viewPage()+1);
@@ -77,9 +99,7 @@
 				self.viewerDensityF(dpi);	
 			}
 		};
-
-		
-	
+			
 	};
 
 	var vm = new viewModel();

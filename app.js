@@ -104,8 +104,21 @@ app.get('/pdf', function (req,res) {
 	var reqQual = req.query['quality'];
 	if (!reqQual) // quality defaults to 80	
 		reqQual=80;
+		
+	// check if user requested a rotation angle in url query (i.e. ../pdf?rotate=90)
+	var reqRot = req.query['rotate'];
+	if (!reqRot) // rotation defaults to 0	
+		reqRot=0;
+	
+	// check if user requested a grayscale rendering (i.e. ../pdf?grayscale=true)
+	var reqGs = req.query['grayscale'];
+	
+	// check if user requested a gamma correction for rendering (i.e. ../pdf?/gamma=0.9)
+	var reqGamma = req.query['gamma'];
+    if (!reqGamma)
+    	reqGamma='1.0';
 			
-	console.log('GET /pdf?page='+reqPage+'&density='+reqDens+'&quality='+reqQual);
+	console.log('GET /pdf?page='+reqPage+'&density='+reqDens+'&quality='+reqQual+"&rotate="+reqRot+"&grayscale="+reqGs+"&gamma="+reqGamma);
 
 	// check this for a better approach: http://docs.nodejitsu.com/articles/advanced/streams/how-to-use-stream-pipe
 
@@ -121,7 +134,11 @@ app.get('/pdf', function (req,res) {
 	var pOut = "test-"+reqPage.toString()+".png";
 	// ghostscript, via convert: cnv = spawn('convert', ['-density',reqDens.toString(), '-quality',reqQual,pIn, pOut]);
 	// pdfdraw (mu-pdftools)
-	cnv = spawn('pdfdraw', ['-g','-r',reqDens,'-o',pOut,pIn,reqPage+1]);
+	if (!reqGs) 
+		cnv = spawn('pdfdraw', ['-G',reqGamma,'-R',reqRot,'-r',reqDens,'-o',pOut,pIn,reqPage+1]);
+	else
+		cnv = spawn('pdfdraw', ['-G', reqGamma,'-g', '-R',reqRot,'-r',reqDens,'-o',pOut,pIn,reqPage+1]);
+		
 	cnv.stdout.on('data', function(data) {
 		console.log('stdout: data received.');
 		//res.pipe(data);
