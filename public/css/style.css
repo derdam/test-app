@@ -65,7 +65,7 @@ body {
 {
 	/* background-color:blue; */
 	padding: 7px;
-	/* white-space:nowrap; */
+	white-space:nowrap; 
 	vertical-align: center;
 }
 
@@ -85,6 +85,13 @@ p.msgcontent {gh
 
 
 .pageNum 
+{	width: 5%;
+	text-align: center;
+	/* background-color: red; */
+}
+
+
+.density 
 {	width: 5%;
 	text-align: center;
 	/* background-color: red; */

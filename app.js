@@ -78,6 +78,11 @@ var util = require('util'),
 // sample: return first page of a pdf in png:
 app.get('/pdf', function (req,res) {
 
+	// check if user requested a local file located in current server's current directory
+	var reqFile = req.query['filename'];
+	if (!reqFile)
+		reqFile="test.pdf"; // defaults to test.pdf
+		
 	// check if user requested a page in url query (i.e. ../pdf?page=1)
 	var reqPage = req.query['page'];
 
@@ -129,9 +134,9 @@ app.get('/pdf', function (req,res) {
 	//var pIn = "test.pdf["+reqPage.toString()+"]";
 	
 	// input file for pdfdraw command
-	var pIn = "test.pdf";
+	var pIn = reqFile;
 	
-	var pOut = "test-"+reqPage.toString()+".png";
+	var pOut = pIn+"."+reqPage.toString()+".png";
 	// ghostscript, via convert: cnv = spawn('convert', ['-density',reqDens.toString(), '-quality',reqQual,pIn, pOut]);
 	// pdfdraw (mu-pdftools)
 	if (!reqGs) 

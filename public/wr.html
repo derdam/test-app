@@ -76,8 +76,8 @@
 
 		<div class="msgframe" data-bind="visible: $root.selectedRow()">
 			<div class="msghead" data-bind="click: $root.closeViewer, visible:$root.viewerVisible()==false"><strong>Preview  </strong>
-				<span><button data-bind="click: $root.zoomOut">-</button><span data-bind="text: $root.viewerDensityP"></span> dpi</span><span><button data-bind="click: $root.zoomIn">+</button></span>
-				&nbsp Quality &nbsp<span><button data-bind="click: $root.viewerQualityL">lo</button><span data-bind="text: $root.viewerQuality"></span></span><span><button data-bind="click: $root.viewerQualityH">hi</button></span>
+				<span><button data-bind="click: $root.zoomOut">-</button><input class="density" data-bind="value: $root.viewerDensityF"></input> dpi</span><span><button data-bind="click: $root.zoomIn">+</button></span>
+				&nbsp Page &nbsp<span><button data-bind="click: $root.prevPage">-</button><input class="pagenum" data-bind="value: $root.page"></span></span><span><button data-bind="click: $root.nextPage">+</button></span>
 			</div>
 			<div class="preview">
 				<img  class="previewPage" data-bind="click: $root.closeViewer, attr:{src: getThumbUrl0}" />
@@ -117,8 +117,28 @@
 		});
 	
 	
+	
+		// tracks displayed page number
+		self.page = ko.observable(1);
+	
+		// display previous page
+		self.prevPage = function()
+		{
+			self.page(parseInt(self.page()));
+			if (self.page()>1)
+				self.page(self.page()-1);
+		};
+	
+	   // display next page
+		self.nextPage = function()
+		{
+				self.page(parseInt(self.page()));
+				self.page(self.page()+1);
+		};
+	
+		/* 20140501 - obsolete 
 		// viewer rendering quality (80 seems a good time/size compromsise)
-		self.viewerQuality = ko.observable(80);
+		//self.viewerQuality = ko.observable(80);
 	
 	    // called when user selects low quality rendering in viewer
 		self.viewerQualityL = function() {
@@ -129,7 +149,7 @@
 		self.viewerQualityH = function() {
 			self.viewerQuality(80);
 		}
-	
+		*/
 		
 		// tracks resultlist items
         self.items = ko.observableArray();
@@ -171,15 +191,20 @@
 */
 
 		self.populate = function() {
-			self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Form A','Signed':'02.04.2014', 'Scanned':'03.04.2014', 'RunNr':'3454', '_id':1});
-			 self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Procuration','Signed':'03.04.2014', 'Scanned':'04.04.2014', 'RunNr':'5012', '_id':2});
-			 self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Non-US Disclosure','Signed':'03.04.2014', 'Scanned':'04.04.2014', 'RunNr':'3654', '_id':3});
-			 self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'E-Banking contract','Signed':'04.04.2014', 'Scanned':'05.04.2014', 'RunNr':'5097', '_id':4});
+			 //self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Form A','Signed':'02.04.2014', 'Scanned':'03.04.2014', 'RunNr':'3454', '_id':1});
+			 //self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Procuration','Signed':'03.04.2014', 'Scanned':'04.04.2014', 'RunNr':'5012', '_id':2});
+			 //self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Non-US Disclosure','Signed':'03.04.2014', 'Scanned':'04.04.2014', 'RunNr':'3654', '_id':3});
+			 //self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'E-Banking contract','Signed':'04.04.2014', 'Scanned':'05.04.2014', 'RunNr':'5097', '_id':4});
 						
 			// self.items.push({'Artist': 'Brahms','Album': 'Klavierkonzert 1', 'DocumentType':'MP3'});
 			// self.items.push({'Artist': 'Wagner','Album': 'Die Walkürie', 'DocumentType':'CD'});
 			// self.items.push({'Artist': 'Portishead','Album': 'Dummy', 'DocumentType':'WAV'});
 	
+			self.items.push({'DocumentType': 'Whitepaper','Title': 'Trace-based JIT Type Specialization for Dynamic Languages', 'Format':'pdf', '_id':'test.pdf'});
+			self.items.push({'DocumentType': 'Book','Title': 'The Holy Bible - Catholic Public Domain Version (original)', 'Format':'pdf', '_id':'bible.pdf'});
+			self.items.push({'DocumentType': 'Catalog','Title': 'Prince Spring 2013 Catalogue', 'Format':'pdf', '_id':'catalog.pdf'});
+			self.items.push({'DocumentType': 'Article','Title': 'Valves at Low Plate Voltage', 'Format':'pdf', '_id':'low-anode.pdf'});
+
 		};
 
 // Event handlers
@@ -234,8 +259,8 @@
 		});
 	*/
 	
-		self.getThumbUrl = function(page) {
-			return "../pdf?density="+self.viewerDensityP()+"&page="+page.toString()+'&quality='+self.viewerQuality();	
+		self.getThumbUrl = function(docid, page) {
+			return "../pdf?density="+self.viewerDensityP()+"&filename="+docid+"&page="+page.toString(); //+'&quality='+self.viewerQuality();	
 		}
 	
 
@@ -243,14 +268,14 @@
 			var id = self.getCol('_id');
 			if (id) {
 				// return "../pdf?density="+self.viewerDensityP()+"&page="+id.toString()+'&quality='+self.viewerQuality();	
-				return self.getThumbUrl(id);
+				return self.getThumbUrl(id,self.page());
 			}
 		});
 
 		self.getThumbUrl1 = ko.computed(function() {
 			var id = self.getCol('_id');
 			if (id) {
-				return self.getThumbUrl(id + 1);
+				return self.getThumbUrl(id,parseInt(self.page())+1);
 			}
 		});
 	
