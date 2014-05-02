@@ -75,17 +75,21 @@
         <!-- selected document options --> 
 
 		<div class="msgframe" data-bind="visible: $root.selectedRow()">
-			<div class="msghead" data-bind="click: $root.closeViewer, visible:$root.viewerVisible()==false"><strong>Preview  </strong>
+			<div class="msghead" data-bind="click: $root.closeViewer, visible:$root.viewerVisible()==false">
 				<span><button data-bind="click: $root.zoomOut">-</button><input class="density" data-bind="value: $root.viewerDensityF"></input> dpi</span><span><button data-bind="click: $root.zoomIn">+</button></span>
-				&nbsp Page &nbsp<span><button data-bind="click: $root.prevPage">-</button><input class="pagenum" data-bind="value: $root.page"></span></span><span><button data-bind="click: $root.nextPage">+</button></span>
+				&nbsp page &nbsp<span><button data-bind="click: $root.prevPage">-</button><input class="pagenum" data-bind="value: $root.page"></span></span><span><button data-bind="click: $root.nextPage">+</button></span>
+				&nbsp rotation &nbsp<span><button data-bind="click: $root.rotL">-</button><input class="rotation" data-bind="value: $root.rotation"></span></span><span><button data-bind="click: $root.rotR">+</button></span>
+				&nbsp gamma &nbsp<span><button data-bind="click: $root.gammaD">-</button><input class="gamma" data-bind="value: $root.gamma"></span></span><span><button data-bind="click: $root.gammaI">+</button></span>
+				&nbsp grayscale &nbsp<span><button data-bind="click: $root.grayscaleD">-</button><input class="gamma" data-bind="value: $root.grayscale"></span></span><span><button data-bind="click: $root.grayscaleE">+</button></span>
+		
 			</div>
 			<div class="preview">
 				<img  class="previewPage" data-bind="click: $root.closeViewer, attr:{src: getThumbUrl0}" />
 				<img  class="previewPage" data-bind="attr:{src: getThumbUrl1}" />
 			</div>
 			
-<div><button data-bind="click: $root.openDoc">Open</button><button data-bind="click: $root.perMail">Send me</button></div>
-<div><span data-bind="text: $root.viewerDensityP"></span></div>			
+			<div><button data-bind="click: $root.openDoc">Open</button><button data-bind="click: $root.perMail">Send me</button></div>
+			<div><span data-bind="text: $root.viewerDensityP"></span></div>			
 		</div>
 		
 	</body>
@@ -116,7 +120,49 @@
 			return Math.round(24 * self.viewerDensityF());
 		});
 	
+		// observes rotation angle
+		self.rotation = ko.observable(0);
+
+		// rotates the document clockwise +90°
+		self.rotR = function() {
+			var angle = self.rotation();
+			angle = angle + 90;
+			if (angle>=360)
+				angle=0;
+			self.rotation(angle);
+		};
 	
+		// rotate the document counterclockwise -90°
+		self.rotL = function() {
+			var angle = self.rotation();
+			angle = angle - 90;
+			if (angle<=-360)
+				angle=0;
+			self.rotation(angle);
+		};
+	
+	
+		// observes gamma correction
+		self.gamma = ko.observable(1.0);
+		
+		self.gammaD = function() {
+			self.gamma(self.gamma()-0.1);
+		};
+	
+		self.gammaI = function() {
+			self.gamma(self.gamma()+0.1);
+		};
+	
+	   // observes grayscale switch
+		self.grayscale = ko.observable(false);
+	
+		self.grayscaleD = function () {
+			self.grayscale(false);
+		};
+	
+		self.grayscaleE = function () {
+			self.grayscale(true);
+		};
 	
 		// tracks displayed page number
 		self.page = ko.observable(1);
@@ -206,6 +252,7 @@
 			self.items.push({'DocumentType': 'Catalog','Title': 'Seldenmast', 'Format':'pdf', '_id':'yacht.pdf'});
 		
 			self.items.push({'DocumentType': 'Article','Title': 'Valves at Low Plate Voltage', 'Format':'pdf', '_id':'low-anode.pdf'});
+ 			self.items.push({'DocumentType': 'Microfilm','Title': 'The Chicago Maroon', 'Format':'pdf', '_id':'article.pdf'});
 
 		};
 
@@ -262,7 +309,11 @@
 	*/
 	
 		self.getThumbUrl = function(docid, page) {
-			return "../pdf?density="+self.viewerDensityP()+"&filename="+docid+"&page="+page.toString(); //+'&quality='+self.viewerQuality();	
+			var extra = "";
+			if (self.grayscale()==true) {
+				extra=extra+"&grayscale=true";
+			}
+			return "../pdf?density="+self.viewerDensityP()+"&filename="+docid+"&page="+page.toString()+"&rotate="+self.rotation()+"&gamma="+self.gamma()+extra; //+'&quality='+self.viewerQuality();	
 		}
 	
 
