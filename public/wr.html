@@ -73,7 +73,7 @@
 	</div>
 </div>
         <!-- selected document options --> 
-
+	<a name="preview"></a>
 		<div class="msgframe" data-bind="visible: $root.selectedRow()">
 			<div class="msghead" data-bind="click: $root.closeViewer, visible:$root.viewerVisible()==false">
 				<span><button data-bind="click: $root.zoomOut">-</button><input class="density" data-bind="value: $root.viewerDensityF"></input> dpi</span><span><button data-bind="click: $root.zoomIn">+</button></span>
@@ -83,13 +83,18 @@
 				&nbsp grayscale &nbsp<span><button data-bind="click: $root.grayscaleD">-</button><input class="gamma" data-bind="value: $root.grayscale"></span></span><span><button data-bind="click: $root.grayscaleE">+</button></span>
 		
 			</div>
+			<a name="pageTop"></a>
 			<div class="preview">
 				<img  class="previewPage" data-bind="click: $root.closeViewer, attr:{src: getThumbUrl0}" />
 				<img  class="previewPage" data-bind="attr:{src: getThumbUrl1}" />
 			</div>
 			
-			<div><button data-bind="click: $root.openDoc">Open</button><button data-bind="click: $root.perMail">Send me</button></div>
-			<div><span data-bind="text: $root.viewerDensityP"></span></div>			
+			<div>
+				<button data-bind="click: $root.openDoc">Open</button><button data-bind="click: $root.perMail">Send me</button>
+				<div class="bottomPager"><span><button data-bind="click: $root.prevPage">-</button><span class="pagenum" data-bind="text: $root.page"></span></span><span><button data-bind="click: $root.nextPageTop">+</button></span><div>
+			
+			</div>
+				
 		</div>
 		
 	</body>
@@ -171,16 +176,23 @@
 		self.prevPage = function()
 		{
 			self.page(parseInt(self.page()));
-			if (self.page()>1)
-				self.page(self.page()-1);
+			if (self.page()>2)
+				self.page(self.page()-2);
 		};
 	
 	   // display next page
 		self.nextPage = function()
 		{
 				self.page(parseInt(self.page()));
-				self.page(self.page()+1);
+				self.page(self.page()+2);
 		};
+	
+		// display next page and pan the client to the top of the page
+		self.nextPageTop = function()
+		{	
+			self.nextPage();
+			window.location = '#pageTop';			
+		}
 	
 		/* 20140501 - obsolete 
 		// viewer rendering quality (80 seems a good time/size compromsise)
@@ -281,6 +293,7 @@
 		// called when user selects a row in result list
 		self.selRow = function(row) {
 			self.selectedRow(row);
+			window.location = "#preview";
 		};
 
 	    // called when user clicks the 'open' button in preview pane	
