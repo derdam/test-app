@@ -77,11 +77,11 @@
 		<div class="msgframe" data-bind="visible: $root.selectedRow()">
 			<div class="msghead" data-bind="click: $root.closeViewer, visible:$root.viewerVisible()==false">
 				<button data-bind="click: $root.toggleZoom">zZz</button>
-				<span><button data-bind="click: $root.zoomOut">-</button><input class="density" data-bind="value: $root.viewerDensityF"></input> dpi</span><span><button data-bind="click: $root.zoomIn">+</button></span>
 				&nbsp page &nbsp<span><button data-bind="click: $root.prevPage">-</button><input class="pagenum" data-bind="value: $root.page"></span></span><span><button data-bind="click: $root.nextPage">+</button></span>
-				&nbsp rotation &nbsp<span><button data-bind="click: $root.rotL">-</button><input class="rotation" data-bind="value: $root.rotation"></span></span><span><button data-bind="click: $root.rotR">+</button></span>
-				&nbsp gamma &nbsp<span><button data-bind="click: $root.gammaD">-</button><input class="gamma" data-bind="value: $root.gamma"></span></span><span><button data-bind="click: $root.gammaI">+</button></span>
+			&nbsp rotation &nbsp<span><button data-bind="click: $root.rotL">-</button><input class="rotation" data-bind="value: $root.rotation"></span></span><span><button data-bind="click: $root.rotR">+</button></span>
+							<span><button data-bind="click: $root.zoomOut">-</button><input class="density" data-bind="value: $root.viewerDensityF"></input> dpi</span><span><button data-bind="click: $root.zoomIn">+</button></span>
 				&nbsp grayscale &nbsp<span><button data-bind="click: $root.grayscaleD">-</button><input class="gamma" data-bind="value: $root.grayscale"></span></span><span><button data-bind="click: $root.grayscaleE">+</button></span>
+		&nbsp gamma &nbsp<span><button data-bind="click: $root.gammaD">-</button><input class="gamma" data-bind="value: $root.gamma"></span></span><span><button data-bind="click: $root.gammaI">+</button></span>
 		
 			</div>
 			<a name="pageTop"></a>
