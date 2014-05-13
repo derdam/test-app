@@ -73,11 +73,14 @@ var util = require('util'),
 		spawn = require('child_process').spawn; //,
 		//cnv = spawn('convert', ['test.pdf', '-']);
 
-
+// tracks calls to GET /pdf handler
+var pdfcount=0;
 
 // sample: return first page of a pdf in png:
 app.get('/pdf', function (req,res) {
 
+	pdfcount+=1;
+	
 	// check if user requested a local file located in current server's current directory
 	var reqFile = req.query['filename'];
 	if (!reqFile)
@@ -136,7 +139,7 @@ app.get('/pdf', function (req,res) {
 	// input file for pdfdraw command
 	var pIn = reqFile;
 	
-	var pOut = pIn+"."+reqPage.toString()+".png";
+	var pOut = pIn+"."+reqPage.toString()+"-"+pdfcount.toString()+".png";
 	// ghostscript, via convert: cnv = spawn('convert', ['-density',reqDens.toString(), '-quality',reqQual,pIn, pOut]);
 	// pdfdraw (mu-pdftools)
 	if (!reqGs) 
@@ -172,6 +175,20 @@ app.get('/pdf', function (req,res) {
 		}
 	});
 
+});
+
+// sample: remote viewer
+
+app.post('/remoteviewer', express.bodyParser(), function(req, res) {
+	console.log("RX POST /remoteviewer");
+	console.log("RX "+req.body.url);
+	//console.log("RX "+JSON.stringify(req.body));
+	//var data = JSON.parse(JSON.stringify(req.body));
+	//console.log("RX "+data.url);
+		var resmsg =  {content:req.body.url, received:new Date()};
+	io.sockets.emit('message', resmsg);
+	
+	res.end();
 });
 
 // sample: simple mailer
@@ -273,7 +290,8 @@ io.sockets.on('connection', function(socket) {
 	}
 	socket.emit('message', cnt);
 	*/
-  
+   
+	
 	 // on message receive (from a channel called 'message')    
     socket.on('message', function (message) {
         console.log('[WS] message received : ' + message);
@@ -295,5 +313,9 @@ io.sockets.on('connection', function(socket) {
 			lastBcMsgHist.splice(0,1); // remove first item in array
 		}
     }); 
+    
+    socket.on('viewer', function (message) {
+        console.log('[WS] viewer received : ' + message);
+	});
 
 });

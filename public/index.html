@@ -47,6 +47,9 @@
 			</table>
 		</div>
 		
+		<div class="msgframe">
+			<img  class="previewPage" data-bind="attr:{src: getThumbUrl}" />
+		</div>
 		
 	</body>
 
@@ -100,7 +103,9 @@
 			broadcastHistory: ko.observableArray()
         };
 		
-		
+		viewModel.getThumbUrl = ko.computed(function() {
+			return viewModel.message();
+		});
 
 		viewModel.onMsgClick = function(data) {
 			// alert(data.content);

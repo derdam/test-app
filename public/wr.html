@@ -202,7 +202,7 @@
 		self.nextPageTop = function()
 		{	
 			self.nextPage();
-			window.location = '#pageTop';			
+			window.location = '#preview' //'#pageTop';			
 		}
 	
 		/* 20140501 - obsolete 
@@ -280,6 +280,10 @@
 			self.items.push({'DocumentType': 'Article','Title': 'Emetteur National de Sottens (R. Pièce, 1938)', 'Format':'pdf', '_id':'sottens-1938.pdf'});
 			self.items.push({'DocumentType': 'Article','Title': 'Emetteur National de Sottens (E. Mettzler, H. Haffolter, 1940)','Format':'pdf', '_id':'sottens-1940.pdf'});
 			self.items.push({'DocumentType': 'Article','Title': 'Emetteur National de Sottens (R. Pièce, 1954)','Format':'pdf', '_id':'sottens-1954.pdf'});
+		
+			// tube-oscillators.pdf
+			self.items.push({'DocumentType': 'Book','Title': 'Vacuum Tubes Oscillators','Format':'pdf', '_id':'tube-oscillators.pdf'});
+	
 		};
 
 // Event handlers
@@ -341,14 +345,16 @@
 				extra=extra+"&grayscale=true";
 			}
 			return "../pdf?density="+self.viewerDensityP()+"&filename="+docid+"&page="+page.toString()+"&rotate="+self.rotation()+"&gamma="+self.gamma()+extra; //+'&quality='+self.viewerQuality();	
-		}
+		};
 	
 
 		self.getThumbUrl0 = ko.computed(function() {
 			var id = self.getCol('_id');
 			if (id) {
 				// return "../pdf?density="+self.viewerDensityP()+"&page="+id.toString()+'&quality='+self.viewerQuality();	
-				return self.getThumbUrl(id,self.page());
+				var ret = self.getThumbUrl(id,self.page());
+				self.putRemoteViewer(ret);
+				return ret;
 			}
 		});
 
@@ -359,11 +365,18 @@
 			}
 		});
 	
+		// demo: send sample document per email
 		self.perMail = function() {
 			$.get("permail");
-		}
+		};
 	
-     	};
+		
+		// demo: send a PUT request to remoteviewer
+		self.putRemoteViewer = function(docurl) {
+			$.post("remoteviewer", {url: docurl}); // { docid: id, page: displayedpage.toString()});
+		};	
+	
+    };
 	
 	
 	
