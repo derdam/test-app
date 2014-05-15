@@ -1,0 +1,74 @@
+<html>
+	<head>
+    	<link href="css/style.css" rel="stylesheet" type="text/css">
+		<title>Admin</title>
+	</head>
+	
+	<body>
+	
+ 		<!-- Send Message frame. A textbox and a send button. -->
+		<div class="msgframe">
+
+			<div class="msghead"><strong>E-mail</strong></div>
+			<div class="msgitem">
+				<span>E-Mail account password :<input type="password" data-bind="value: $root.mailPwd"></input></span>
+			<button data-bind="click: setMailPwd">apply</button>
+			</div>
+		</div>
+		<!--
+		<span data-bind="text: viewerDensityP()"></span>dip&nbsp
+		<span data-bind="text: rotation()"></span>°
+		-->
+		
+	</body>
+
+</html>
+
+
+<!--Include JavaScripts for JQuery and Knockout.js <-->
+<script type='text/javascript' src='js/jquery.js'></script>
+<script type='text/javascript' src='js/knockout-min.js'></script>
+
+<script type="text/javascript">
+	
+        // Here's my data model
+   var viewModel = function () {
+		var self=this;
+	
+		// observes viewed page number
+	
+	/* 
+		self.viewPage = ko.observable(1);	
+	
+		self.viewerDensityF = ko.observable(1.0);
+		// observes viewer density
+		self.viewerDensityP = ko.computed(function() {
+			 return Math.round(128 * self.viewerDensityF());
+			//return 150;
+		});
+	
+		// observes rotation angle
+		self.rotation = ko.observable(0);
+	
+		// observes view Url
+		self.viewUrl = ko.computed(function() {
+			return "../pdf?page="+self.viewPage()+"&density="+self.viewerDensityP()+"&rotate="+self.rotation();
+		});
+	
+		*/
+	
+		self.mailPwd = ko.observable();
+	
+		self.setMailPwd = function() {
+			$.post("../admin/mail-pwd", {'mailpwd': self.mailPwd()}); 
+			self.mailPwd('');
+		};
+	
+	};
+	
+	var vm = new viewModel();
+    ko.applyBindings(vm); // This makes Knockout get to work
+		
+
+ </script>
+ 

@@ -26,14 +26,25 @@ var httpsOpts = {
   cert: fs.readFileSync(__dirname +'/ssl/cert.pem')
 };
 
-https.createServer(httpsOpts, app).listen(8081);
-console.log('Server running, listening on port 8081 for https.');
+https.createServer(httpsOpts, app).listen(port+1);
+console.log('Server running, listening on port '+(port+1)+' for https.');
+
+
+
+var args = process.argv.slice(2);
+// console.log('args: '+args);
+
+if(args=='') {
+	console.log('WARNING: send per mail will not work: missing parameters.');
+}
+
+var mailpwd = args;
 
 
 
 // Web socket setup
 var io = require('socket.io').listen(server);
-console.log('Server running, listening on port ', port);
+//console.log('Server running, listening on port ', port);
 
 
 // provide satic web server. /public is the folder used as root.
@@ -45,6 +56,23 @@ app.get('/prx', function (req, res) {
 	var x = request('http://192.168.10.157:3000/user');
 	req.pipe(x);
     x.pipe(res);
+});
+
+
+app.get('/admin', function (req, res) {
+	res.type('application/json');
+	res.send(JSON.stringify({ismailpwd:(mailpwd!='')}));
+	res.end();
+});
+
+app.post('/admin/mail-pwd', express.bodyParser(), function (req, res) {
+	console.log('POST: /admin/mail-pwd');
+	// console.log('mailpwd: '+req.body.mailpwd);
+	if (req.body.mailpwd) {
+		mailpwd = req.body.mailpwd;
+		console.log("mail-pwd set: ******"); // + mailpwd);
+	}
+	
 });
 
 
@@ -159,23 +187,217 @@ app.get('/pdf', function (req,res) {
 		  
 		  // ask stream to remove sent file when pipe is completed.
 		  rs.on('end', function() {
+		  
 			 console.log('Cleaning '+pOut+' ..');
 			 fs.unlink(pOut, function (err) {
   				if (!err)
   					console.log('successfully deleted.\n');
   					// else: forget deliberatly.
 			  });
+			  
 		  });
 
 		  rs.pipe(res);	
 		} else {
 			res.end();
-			 fs.unlink(pOut);
+			fs.unlink(pOut);
   			
 		}
 	});
 
 });
+
+// sample: pdf info
+app.get('/pdf/info', function (req, res) {
+
+	pdfcount+=1;
+	
+	// check if user requested a local file located in current server's current directory
+	var reqFile = req.query['filename'];
+	if (!reqFile)
+		reqFile="test.pdf"; // defaults to test.pdf
+		
+	// check if user requested a page in url query (i.e. ../pdf?page=1)
+	var reqPage = req.query['page'];
+
+	if (!reqPage) { // requested page defaults to 0 (get metadata for whole document)
+		reqPage=0
+	} 
+	else if (reqPage<1) { // page number guard
+		reqPage=1;
+	}
+	
+		
+	console.log('GET /pdf/info?filename='+reqFile+'&page='+reqPage);
+			
+	//var cmd = "pdfinfo -f "+reqPage+" -l "+reqPage+" "+reqFile;
+	
+	//console.log('SPAWN '+cmd);
+	
+	if (reqPage>0) {
+		cnv = spawn('pdfinfo', ['-f', reqPage, '-l', reqPage, reqFile])
+	} else
+	{
+		cnv = spawn('pdfinfo', [reqFile])
+	}
+	
+		
+	res.type('text');
+	var buf;
+	cnv.stdout.on('data', function(data) {
+		// console.log('stdout: data received: '+data);
+		buf=buf+data;
+		
+	});
+	
+	cnv.on('exit', function (code) {
+  		console.log('convert process exited with code ' + code);
+  		res.type('application/json');
+  		res.send(foo(buf));
+  			//res.send(buf);
+  		res.end();
+	});	
+	
+});
+
+var foo = function(data) {
+	// console.log("data: "+data);
+	
+	// 'original' way of doing, kept for example
+	/*
+	var rePattern = new RegExp(/(Pages:)([ ]*)([0-9]*)/);
+	var matches = data.match(rePattern);
+	var pages = matches.pop(); // page number is in last group. 
+	*/
+	
+	if (data) {
+	
+	// 'new' and shorter way
+	var mpages = data.match(new RegExp(/(Pages:)([ ]*)([0-9]*)/));
+	
+	var mtitle = data.match(new RegExp(/(Title:)([ ]*)(.*)/));
+	var title = mtitle==null ? undefined : mtitle.pop();
+	
+	//console.log(title);
+	var mauthor = data.match(new RegExp(/(Author:)([ ]*)(.*)/));
+	
+	var mpagesize = data.match(new RegExp(/(Page[ ,0-9]* size:[ ])(.*)/));
+	
+	var mencrypted = data.match(new RegExp(/(Encrypted:)([ ]*)(.*)/));
+	
+	return {'title' : title,
+			'author' : mauthor == null ? undefined : mauthor.pop(),
+			'pages' : mpages == null ? undefined : mpages.pop(),
+			'page-size' : mpagesize == null ? undefined : mpagesize.pop(),
+			'encrypted' : mencrypted == null ? undefined : mencrypted.pop()
+			};
+	}
+}
+
+// sample: pdf metadata
+app.get('/pdf/metadata', function (req, res) {
+
+	pdfcount+=1;
+	
+	// check if user requested a local file located in current server's current directory
+	var reqFile = req.query['filename'];
+	if (!reqFile)
+		reqFile="test.pdf"; // defaults to test.pdf
+	
+	// check if user requested a page in url query (i.e. ../pdf?page=1)
+	var reqPage = req.query['page'];
+
+	if (!reqPage) { // requested page defaults to 0 (get metadata for whole document)
+		reqPage=0
+	} 
+	else if (reqPage<1) { // page number guard
+		reqPage=1;
+	}
+	
+				
+	console.log('GET /pdf/metadata?filename='+reqFile+'&page='+reqPage);
+			
+	if (reqPage>0) {
+		cnv = spawn('pdfinfo', ['-meta', '-f', reqPage, '-l', reqPage, reqFile]);
+	}
+	else
+	{
+		cnv = spawn('pdfinfo', ['-meta', reqFile]);
+
+	}
+	
+		
+	res.type('text');
+	var buf;
+	cnv.stdout.on('data', function(data) {
+		// console.log('stdout: data received: '+data);
+		buf=buf+data;
+		
+	});
+	
+	cnv.on('exit', function (code) {
+  		console.log('convert process exited with code ' + code);
+  		res.send(buf);
+  		res.end();
+	});
+	
+});
+
+
+// sample: pdf text
+app.get('/pdf/text', function (req, res) {
+
+	pdfcount+=1;
+	
+	// check if user requested a local file located in current server's current directory
+	var reqFile = req.query['filename'];
+	if (!reqFile)
+		reqFile="test.pdf"; // defaults to test.pdf
+		
+		
+	// check if user requested a page in url query (i.e. ../pdf?page=1)
+	var reqPage = req.query['page'];
+
+	if (!reqPage) { // requested page defaults to 0 (get text for whole document)
+		reqPage=0
+	} 
+	else if (reqPage<1) { // page number guard
+		reqPage=1;
+	}
+	
+				
+	console.log('GET /pdf/text?filename='+reqFile+'&page='+reqPage);
+			
+	var cmd = "pdfdraw -t "+reqFile+" "+reqPage;
+	
+	console.log('SPAWN '+cmd);
+	
+	if (reqPage > 0) {
+		var pageRange = reqPage; //+','+reqPage;
+		cnv = spawn('pdfdraw', ['-t', reqFile, pageRange]); 
+	} else {
+		cnv = spawn('pdfdraw', ['-t', reqFile]); 
+	}
+	
+		
+
+	var buf='';
+	cnv.stdout.on('data', function(data) {
+		// console.log('stdout: data received: '+data);
+		buf+=data;
+		
+	});
+	
+	cnv.on('exit', function (code) {
+  		console.log('convert process exited with code ' + code);
+  		//res.type('html');
+  		res.send(buf);
+  		res.end();
+	});
+			
+});
+
+
 
 // sample: remote viewer
 
@@ -185,8 +407,9 @@ app.post('/remoteviewer', express.bodyParser(), function(req, res) {
 	//console.log("RX "+JSON.stringify(req.body));
 	//var data = JSON.parse(JSON.stringify(req.body));
 	//console.log("RX "+data.url);
-		var resmsg =  {content:req.body.url, received:new Date()};
-	io.sockets.emit('message', resmsg);
+	
+	//	var resmsg =  {content:req.body.url, received:new Date()};
+	//io.sockets.emit('message', resmsg);
 	
 	res.end();
 });
@@ -199,11 +422,13 @@ var smtpTransport = nodemailer.createTransport("SMTP",{
     service: "Gmail",
     auth: {
         user: "damien.derbes@gmail.com",
-        pass: "****" // TODO: de-hard code and change e-mail password on this account !!
+        pass: mailpwd // TODO: de-hard code and change e-mail password on this account !!
     }
 });
 
 app.get('/permail', function (req, res) {
+
+// console.log('mailpwd: '+mailpwd);
 
 	console.log("creating qrindex.png for document");
 	var qrcode = qr.image('data:'+'test.pdf', {type:'png'});

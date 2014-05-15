@@ -77,11 +77,11 @@
 		<div class="msgframe" data-bind="visible: $root.selectedRow()">
 			<div class="msghead" data-bind="click: $root.closeViewer, visible:$root.viewerVisible()==false">
 				<button data-bind="click: $root.toggleZoom">zZz</button>
-				&nbsp page &nbsp<span><button data-bind="click: $root.prevPage">-</button><input class="pagenum" data-bind="value: $root.page"></span></span><span><button data-bind="click: $root.nextPage">+</button></span>
-			&nbsp rotation &nbsp<span><button data-bind="click: $root.rotL">-</button><input class="rotation" data-bind="value: $root.rotation"></span></span><span><button data-bind="click: $root.rotR">+</button></span>
-							<span><button data-bind="click: $root.zoomOut">-</button><input class="density" data-bind="value: $root.viewerDensityF"></input> dpi</span><span><button data-bind="click: $root.zoomIn">+</button></span>
-				&nbsp grayscale &nbsp<span><button data-bind="click: $root.grayscaleD">-</button><input class="gamma" data-bind="value: $root.grayscale"></span></span><span><button data-bind="click: $root.grayscaleE">+</button></span>
-		&nbsp gamma &nbsp<span><button data-bind="click: $root.gammaD">-</button><input class="gamma" data-bind="value: $root.gamma"></span></span><span><button data-bind="click: $root.gammaI">+</button></span>
+				&nbsp page<span><button data-bind="click: $root.prevPage">-</button><input class="pagenum" data-bind="value: $root.page"></span></span><span><button data-bind="click: $root.nextPage">+</button></span>
+			&nbsp rotation<span><button data-bind="click: $root.rotL">-</button><input class="rotation" data-bind="value: $root.rotation"></span></span><span><button data-bind="click: $root.rotR">+</button></span>
+					&nbsp zoom<span><button data-bind="click: $root.zoomOut">-</button><input class="density" data-bind="value: $root.viewerDensityF"></input></span><span><button data-bind="click: $root.zoomIn">+</button></span>
+				&nbsp grayscale<span><button data-bind="click: $root.grayscaleD">-</button><input class="gamma" data-bind="value: $root.grayscale"></span></span><span><button data-bind="click: $root.grayscaleE">+</button></span>
+		&nbsp gamma<span><button data-bind="click: $root.gammaD">-</button><input class="gamma" data-bind="value: $root.gamma"></span></span><span><button data-bind="click: $root.gammaI">+</button></span>
 		
 			</div>
 			<a name="pageTop"></a>
@@ -91,12 +91,13 @@
 			</div>
 			
 			<div>
-				<button data-bind="click: $root.openDoc">Open</button><button data-bind="click: $root.perMail">Send me</button>
+				<button data-bind="click: $root.perMail">Send me</button>
 				<div class="bottomPager"><span><button data-bind="click: $root.prevPage">-</button><span class="pagenum" data-bind="text: $root.page"></span></span><span><button data-bind="click: $root.nextPageTop">+</button></span><div>
 			
 			</div>
 				
 		</div>
+		
 		
 	</body>
 
@@ -114,6 +115,9 @@
 
 
 		var self=this;
+	
+		// tracks current document PDF properties
+		self.pdfProps = ko.observable();
 
 		// tracks viewer visibility	
 		self.viewerVisible = ko.observable();
@@ -202,7 +206,7 @@
 		self.nextPageTop = function()
 		{	
 			self.nextPage();
-			window.location = '#preview' //'#pageTop';			
+			window.location = '#pageTop'; //'#preview' //'#pageTop';			
 		}
 	
 		/* 20140501 - obsolete 
@@ -315,14 +319,16 @@
 		};
 
 	    // called when user clicks the 'open' button in preview pane	
+		// Remove because the goal of this app is to avoid opening the PDF directly.
+	/*
 		self.openDoc = function() {
 			var id = self.getCol('_id');
 			if (id) {
-				window.location.href = "../pdf?density=196&page="+id.toString();	
+				window.location.href = "../"+id.toString();	
 			}
 		}
 
-
+	*/
 		// called when the user closes the viewer	
 		self.closeViewer = function() {
 			self.viewerVisible(false);
@@ -354,10 +360,16 @@
 				// return "../pdf?density="+self.viewerDensityP()+"&page="+id.toString()+'&quality='+self.viewerQuality();	
 				var ret = self.getThumbUrl(id,self.page());
 				self.putRemoteViewer(ret);
+				//self.updateDocPdfProps(id);
 				return ret;
 			}
 		});
 
+
+	    self.updateDocPdfProps = function(docid) {
+			$.get("../pdf/info/?filename="+docid+"&page="+self.page(), self.pdfProps);
+		}
+	
 		self.getThumbUrl1 = ko.computed(function() {
 			var id = self.getCol('_id');
 			if (id) {
