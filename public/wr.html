@@ -78,9 +78,9 @@
 			<div class="msghead" data-bind="click: $root.closeViewer, visible:$root.viewerVisible()==false">
 				<button data-bind="click: $root.toggleZoom">zZz</button>
 				&nbsp page<span><button data-bind="click: $root.prevPage">-</button><input class="pagenum" data-bind="value: $root.page"></span></span><span><button data-bind="click: $root.nextPage">+</button></span>
-			&nbsp rotation<span><button data-bind="click: $root.rotL">-</button><input class="rotation" data-bind="value: $root.rotation"></span></span><span><button data-bind="click: $root.rotR">+</button></span>
+			&nbsp rot<span><button data-bind="click: $root.rotL">-</button><input class="rotation" data-bind="value: $root.rotation"></span></span><span><button data-bind="click: $root.rotR">+</button></span>
 					&nbsp zoom<span><button data-bind="click: $root.zoomOut">-</button><input class="density" data-bind="value: $root.viewerDensityF"></input></span><span><button data-bind="click: $root.zoomIn">+</button></span>
-				&nbsp grayscale<span><button data-bind="click: $root.grayscaleD">-</button><input class="gamma" data-bind="value: $root.grayscale"></span></span><span><button data-bind="click: $root.grayscaleE">+</button></span>
+				&nbsp gray<span><button data-bind="click: $root.grayscaleD">-</button><input class="gamma" data-bind="value: $root.grayscale"></span></span><span><button data-bind="click: $root.grayscaleE">+</button></span>
 		&nbsp gamma<span><button data-bind="click: $root.gammaD">-</button><input class="gamma" data-bind="value: $root.gamma"></span></span><span><button data-bind="click: $root.gammaI">+</button></span>
 		
 			</div>
@@ -93,12 +93,12 @@
 			<div>
 				<button data-bind="click: $root.perMail">Send me</button>
 				<div class="bottomPager"><span><button data-bind="click: $root.prevPage">-</button><span class="pagenum" data-bind="text: $root.page"></span></span><span><button data-bind="click: $root.nextPageTop">+</button></span><div>
-			
+				
 			</div>
 				
 		</div>
 		
-		
+				
 	</body>
 
 </html>
@@ -125,15 +125,13 @@
 		// viewer density factor, for preview and view
 		self.viewerDensityF = ko.observable(1.0);
 	
+		self.zoom = ko.observable(false);
+	
 		// toggles between thumbnails and page preview	
 		self.toggleZoom = function() {
-			if (self.viewerDensityF()<4.0)
-			{
-				self.viewerDensityF(4.0);
-			} else if (self.viewerDensityF()>1.5) {
-				self.viewerDensityF(1.0);
-			}
+			self.zoom(!self.zoom());
 		};
+		
 	
 		// preview thumbnails density
 		self.viewerDensityP = ko.computed(function() {
@@ -288,6 +286,9 @@
 			// tube-oscillators.pdf
 			self.items.push({'DocumentType': 'Book','Title': 'Vacuum Tubes Oscillators','Format':'pdf', '_id':'tube-oscillators.pdf'});
 	
+		// arrl-1936.pdf
+			self.items.push({'DocumentType': 'Book','Title': 'ARRL Radio Amateur Handbook (1936)','Format':'pdf', '_id':'arrl-1936.pdf'});
+	
 		};
 
 // Event handlers
@@ -350,6 +351,9 @@
 			if (self.grayscale()==true) {
 				extra=extra+"&grayscale=true";
 			}
+	
+			extra = extra + "&zoom=" + self.zoom();
+			//self.updateDocPdfProps(docid);
 			return "../pdf?density="+self.viewerDensityP()+"&filename="+docid+"&page="+page.toString()+"&rotate="+self.rotation()+"&gamma="+self.gamma()+extra; //+'&quality='+self.viewerQuality();	
 		};
 	
@@ -358,9 +362,10 @@
 			var id = self.getCol('_id');
 			if (id) {
 				// return "../pdf?density="+self.viewerDensityP()+"&page="+id.toString()+'&quality='+self.viewerQuality();	
+				
 				var ret = self.getThumbUrl(id,self.page());
-				self.putRemoteViewer(ret);
-				//self.updateDocPdfProps(id);
+				// self.putRemoteViewer(ret);
+			
 				return ret;
 			}
 		});

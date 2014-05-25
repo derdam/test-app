@@ -149,61 +149,113 @@ app.get('/pdf', function (req,res) {
 	// check if user requested a grayscale rendering (i.e. ../pdf?grayscale=true)
 	var reqGs = req.query['grayscale'];
 	
-	// check if user requested a gamma correction for rendering (i.e. ../pdf?/gamma=0.9)
+	// check if user requested a gamma correction for rendering (i.e. ../pdf?gamma=0.9)
 	var reqGamma = req.query['gamma'];
     if (!reqGamma)
     	reqGamma='1.0';
+    	
+    // check if user requested a zoom toggle (i.e. /pdf?zoom=true
+    
+    var reqZoom = req.query['zoom'];
+    if (!reqZoom)
+    	reqZoom="false"; // defaults to false
+    	
+    	
+    	
 			
-	console.log('GET /pdf?page='+reqPage+'&density='+reqDens+'&quality='+reqQual+"&rotate="+reqRot+"&grayscale="+reqGs+"&gamma="+reqGamma);
+	console.log('GET /pdf?page='+reqPage+'&density='+reqDens+'&quality='+reqQual+"&rotate="+reqRot+"&grayscale="+reqGs+"&gamma="+reqGamma+"&zoom="+reqZoom);
 
 	// check this for a better approach: http://docs.nodejitsu.com/articles/advanced/streams/how-to-use-stream-pipe
-
-
-	 res.type('png');
-	 
-	// input file for convert command
-	//var pIn = "test.pdf["+reqPage.toString()+"]";
 	
-	// input file for pdfdraw command
-	var pIn = reqFile;
+	cinf =  spawn('pdfinfo', ['-f', reqPage, '-l', reqPage, reqFile]);
 	
-	var pOut = pIn+"."+reqPage.toString()+"-"+pdfcount.toString()+".png";
-	// ghostscript, via convert: cnv = spawn('convert', ['-density',reqDens.toString(), '-quality',reqQual,pIn, pOut]);
-	// pdfdraw (mu-pdftools)
-	if (!reqGs) 
-		cnv = spawn('pdfdraw', ['-G',reqGamma,'-R',reqRot,'-r',reqDens,'-o',pOut,pIn,reqPage+1]);
-	else
-		cnv = spawn('pdfdraw', ['-G', reqGamma,'-g', '-R',reqRot,'-r',reqDens,'-o',pOut,pIn,reqPage+1]);
+	cinf.on('exit', function (code) {
+  		console.log('pdfinfo process exited with code ' + code);
+  		// buf=foo(buf);		
+	});	
+	
+console.log("ici");
+	cinf.stdout.on('data', function(data) {
+		// console.log('stdout: data received: '+data);
 		
-	cnv.stdout.on('data', function(data) {
-		console.log('stdout: data received.');
-		//res.pipe(data);
+		try {
+			var pp = foo(data.toString());
 		
-	});
-	cnv.on('exit', function (code) {
-  		console.log('convert process exited with code ' + code);
-		if (code==0) {
-		  var rs = fs.createReadStream(pOut);
-		  
-		  // ask stream to remove sent file when pipe is completed.
-		  rs.on('end', function() {
-		  
-			 console.log('Cleaning '+pOut+' ..');
-			 fs.unlink(pOut, function (err) {
-  				if (!err)
-  					console.log('successfully deleted.\n');
-  					// else: forget deliberatly.
-			  });
-			  
-		  });
-
-		  rs.pipe(res);	
-		} else {
-			res.end();
-			fs.unlink(pOut);
-  			
+			if (pp) {
+				console.log('data: '+pp.pageDpiFactor);
+				var zf = 0.25;
+				
+				if (reqZoom=="true")
+					zf=1.0;
+					
+				reqDens=Math.round(108*pp.pageDpiFactor*zf); // 108 for 2 A4 pages on a 
+			}
 		}
-	});
+		catch(err)
+		{
+			console.log("pdinfo parse err: "+err.toString());
+		}
+		
+	
+	
+	
+
+		// serve pdf page
+		res.type('png');
+			
+		// input file for pdfdraw command
+		var pIn = reqFile;
+		
+		var pOut = pIn+"."+reqPage.toString()+"-"+pdfcount.toString()+".png";
+		// ghostscript, via convert: cnv = spawn('convert', ['-density',reqDens.toString(), '-quality',reqQual,pIn, pOut]);
+		// pdfdraw (mu-pdftools)
+		if (true) // | reqPage<pp.pages) // (! fs.existsSync(pOut)) {
+			if (!reqGs) 
+				cnv = spawn('pdfdraw', ['-G',reqGamma,'-R',reqRot,'-r',reqDens,'-o',pOut,pIn,reqPage+1]);
+			else
+				cnv = spawn('pdfdraw', ['-G', reqGamma,'-g', '-R',reqRot,'-r',reqDens,'-o',pOut,pIn,reqPage+1]);
+				
+			cnv.stdout.on('data', function(data) {
+				console.log('stdout: data received.');
+				//res.pipe(data);
+				
+			});
+			
+			cnv.on('err', function (err) {
+			});
+			
+			cnv.on('exit', function (code) {
+		  		console.log('convert process exited with code ' + code);
+				if (code==0) {
+				  var rs = fs.createReadStream(pOut);
+				  
+				  // ask stream to remove sent file when pipe is completed.
+				  rs.on('end', function() {
+				  
+					 console.log('Cleaning '+pOut+' ..');
+					 fs.unlink(pOut, function (err) {
+		  				if (!err)
+		  					console.log('successfully deleted.\n');
+		  					// else: forget deliberatly.
+					  });				 
+					  
+				  });
+		
+				  rs.pipe(res);	
+				} else {
+					res.end();
+					fs.unlink(pOut, function (err) {
+		  				if (!err)
+		  					console.log('successfully deleted.\n');
+		  					// else: forget deliberatly.
+					  });				 
+					 
+		  			
+			}
+		});
+	
+	});	 
+	
 
 });
 
@@ -281,14 +333,33 @@ var foo = function(data) {
 	//console.log(title);
 	var mauthor = data.match(new RegExp(/(Author:)([ ]*)(.*)/));
 	
+	// extract page width
+	var pw = 595.32;
+	
 	var mpagesize = data.match(new RegExp(/(Page[ ,0-9]* size:[ ])(.*)/));
+	
+	if (mpagesize) {
+		var ps = mpagesize.pop();
+		var mpagesizeDet = ps.match(new RegExp(/([0-9.]+)([ ]+x[ ]+)([0-9.]+)/));
+
+		if (mpagesizeDet)
+			pw = parseFloat(mpagesizeDet[1]);
+	}
+	
+	// compute dpi page factor, so that clien can scale each page to same width
+	var pdpif = 1.0;
+	
+	if (pw > 0.1) {
+		pdpif = 595.32/pw;  // scale to A4 page width, expressed in points.
+	}
 	
 	var mencrypted = data.match(new RegExp(/(Encrypted:)([ ]*)(.*)/));
 	
 	return {'title' : title,
 			'author' : mauthor == null ? undefined : mauthor.pop(),
 			'pages' : mpages == null ? undefined : mpages.pop(),
-			'page-size' : mpagesize == null ? undefined : mpagesize.pop(),
+			'pageSize' : mpagesize == null ? undefined : ps,
+			'pageDpiFactor' : pdpif,
 			'encrypted' : mencrypted == null ? undefined : mencrypted.pop()
 			};
 	}
