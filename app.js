@@ -191,36 +191,10 @@ app.get('/pdf', function (req,res) {
 
 	// check this for a better approach: http://docs.nodejitsu.com/articles/advanced/streams/how-to-use-stream-pipe
 	
-	cinf =  spawn('pdfinfo', ['-f', 1,   reqFile]);
-	
-	cinf.on('exit', function (code) {
-  		console.log('pdfinfo process exited with code ' + code);
-  		// buf=foo(buf);		
-	});	
-	
 
-	cinf.stdout.on('data', function(data) {
-		// console.log('stdout: data received: '+data);
-		
-		try {
-			var pp = foo(data.toString());
-		
-			if (pp) {
-				console.log('data: '+pp.pageDpiFactor);
-				var zf = 0.25;
-				
-				if (reqZoom=="true")
-					zf=1.0;
-					
-				reqDens=Math.round(108*pp.pageDpiFactor*zf); // 108 for 2 A4 pages on a 
-			}
-		}
-		catch(err)
-		{
-			console.log("pdinfo parse err: "+err.toString());
-		}
-		
-	
+	// Callback - serve the requested page.
+	var doServe = function() {
+		//console.log("doServe");
 		// serve pdf page
 		res.type('png');
 		
@@ -276,10 +250,74 @@ app.get('/pdf', function (req,res) {
 					 });				 
 				}
 			});
+			
+	}
 	
-	});	 
 	
-
+	// compute pdfinfo key for cache retrieval
+	var pik = reqFile; // we use filename as key
+	var pif  = pgInfoCache[pik];
+	
+	//console.log('pif= '+pif);
+	
+	if (pif) {
+		console.log("pgInfoCache HIT for pik "+pik);
+		console.log('data: '+pif.pageDpiFactor);
+				var zf = 0.25;
+				
+				if (reqZoom=="true")
+					zf=1.0;
+					
+				reqDens=Math.round(108*pif.pageDpiFactor*zf); // 108 for 2 A4 pages on a 
+				// invoke callback for serving page:
+				doServe();
+		
+	} else {
+		console.log("pgInfoCache missed for pik "+pik);
+		
+		
+	
+	
+	
+	// get pdf info (page count page/s size, ..)
+	cinf =  spawn('pdfinfo', ['-f', 1,   reqFile]);
+	
+	// get pdf info callback
+	cinf.on('exit', function (code) {
+  		console.log('pdfinfo process exited with code ' + code);
+  		// buf=foo(buf);		
+	});	
+	
+	// get pdf info callback
+	cinf.stdout.on('data', function(data) {
+		try {
+			var pp = foo(data.toString());
+		
+			if (pp) {
+			
+				if (!pif) {
+					console.log('adding pdfinfo for pik '+pik);
+					pgInfoCache[pik] = pp;
+				}
+				
+				console.log('data: '+pp.pageDpiFactor);
+				var zf = 0.25;
+				
+				if (reqZoom=="true")
+					zf=1.0;
+					
+				reqDens=Math.round(108*pp.pageDpiFactor*zf); // 108 for 2 A4 pages on a 
+				// invoke callback for serving page:
+				doServe();
+			}
+		}
+		catch(err)
+		{
+			console.log("pdinfo parse err: "+err.toString());
+		}
+	});	
+	}
+	  
 });
 
 // sample: pdf info
