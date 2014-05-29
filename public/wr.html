@@ -286,9 +286,17 @@
 			// tube-oscillators.pdf
 			self.items.push({'DocumentType': 'Book','Title': 'Vacuum Tubes Oscillators','Format':'pdf', '_id':'tube-oscillators.pdf'});
 	
-		// arrl-1936.pdf
+			// arrl-1936.pdf
 			self.items.push({'DocumentType': 'Book','Title': 'ARRL Radio Amateur Handbook (1936)','Format':'pdf', '_id':'arrl-1936.pdf'});
 	
+	 		// spark-transmitter.pdf
+			self.items.push({'DocumentType': 'Book extract','Title': 'Spark transmitter','Format':'pdf', '_id':'spark-transmitter.pdf'});
+	
+	
+			// raspail-camp-des-saints.pdf (1973) ISBN 978-2-221-12396-6
+			self.items.push({'DocumentType': 'Book','Title': 'Jean Raspail - Le camp des saints (1973) -  ISBN 978-2-221-12396-6','Format':'pdf', '_id':'raspail-camp-des-saints.pdf'});
+	
+
 		};
 
 // Event handlers
@@ -384,7 +392,10 @@
 	
 		// demo: send sample document per email
 		self.perMail = function() {
-			$.get("permail");
+			var id = self.getCol('_id');
+			if (id) {
+				$.get("permail?filename="+id);
+			}
 		};
 	
 		

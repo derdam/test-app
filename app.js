@@ -104,7 +104,10 @@ var util = require('util'),
 // tracks calls to GET /pdf handler
 var pdfcount=0;
 
-// sample: return first page of a pdf in png:
+// a collection of pageinfo request/responses to be used as a simple cache.
+var pgInfoCache = {};
+
+// sample: return  page of a pdf in png:
 app.get('/pdf', function (req,res) {
 
 	pdfcount+=1;
@@ -167,14 +170,14 @@ app.get('/pdf', function (req,res) {
 
 	// check this for a better approach: http://docs.nodejitsu.com/articles/advanced/streams/how-to-use-stream-pipe
 	
-	cinf =  spawn('pdfinfo', ['-f', reqPage, '-l', reqPage, reqFile]);
+	cinf =  spawn('pdfinfo', ['-f', 1,   reqFile]);
 	
 	cinf.on('exit', function (code) {
   		console.log('pdfinfo process exited with code ' + code);
   		// buf=foo(buf);		
 	});	
 	
-console.log("ici");
+
 	cinf.stdout.on('data', function(data) {
 		// console.log('stdout: data received: '+data);
 		
@@ -197,16 +200,17 @@ console.log("ici");
 		}
 		
 	
-	
-	
-
 		// serve pdf page
 		res.type('png');
+		
+		res.header("Cache-Control", "no-cache, no-store");
+		
 			
 		// input file for pdfdraw command
 		var pIn = reqFile;
 		
-		var pOut = pIn+"."+reqPage.toString()+"-"+pdfcount.toString()+".png";
+		// on linux/ubuntu we use /dev/shm RAM storage for temporary files.
+		var pOut = "/dev/shm/"+pIn+"."+reqPage.toString()+"-"+pdfcount.toString()+".png";
 		// ghostscript, via convert: cnv = spawn('convert', ['-density',reqDens.toString(), '-quality',reqQual,pIn, pOut]);
 		// pdfdraw (mu-pdftools)
 		if (true) // | reqPage<pp.pages) // (! fs.existsSync(pOut)) {
@@ -248,11 +252,9 @@ console.log("ici");
 		  				if (!err)
 		  					console.log('successfully deleted.\n');
 		  					// else: forget deliberatly.
-					  });				 
-					 
-		  			
-			}
-		});
+					 });				 
+				}
+			});
 	
 	});	 
 	
@@ -501,20 +503,25 @@ app.get('/permail', function (req, res) {
 
 // console.log('mailpwd: '+mailpwd);
 
-	console.log("creating qrindex.png for document");
-	var qrcode = qr.image('data:'+'test.pdf', {type:'png'});
+	// check if user requested a local file located in current server's current directory
+	var reqFile = req.query['filename'];
+	if (!reqFile)
+		reqFile="test.pdf"; // defaults to test.pdf
+	
+	console.log("creating qrindex.png for document "+reqFile);
+	var qrcode = qr.image('data:'+reqFile, {type:'png'});
 	
 	// setup e-mail data with unicode symbols
 	var mailOptions = {
 	    from: "Xanthos Web Retrieval", // sender address
 	    to: "damien.derbes@gmail.com", // ", // list of receivers
-	    subject: "Xanthos Web Retrieval - document delivery", // Subject line
+	    subject: "Xanthos Web Retrieval - document delivery - "+reqFile, // Subject line
 	    text: "1 Document in attachment.", // plaintext body
 	    // html: "<b>Hello world ✔</b>" // html body
 	    attachments: [
 	    	{   // file on disk as an attachment
-            	fileName: "test.pdf",
-            	filePath: "test.pdf" // stream this file
+            	fileName: reqFile,
+            	filePath: reqFile // stream this file
         	},
         	{   // use URL as an attachment
             	fileName: "qrindex.png",
@@ -523,7 +530,7 @@ app.get('/permail', function (req, res) {
 	    ]
 	}
 	
-	   console.log("Sending test.pdf per mail..");
+	   console.log("Sending "+reqFile+" per mail..");
 	// send mail with defined transport object
 	smtpTransport.sendMail(mailOptions, function(error, response){
 	    if(error){
