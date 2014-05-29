@@ -75,6 +75,27 @@ app.post('/admin/mail-pwd', express.bodyParser(), function (req, res) {
 	
 });
 
+app.post('/pdf/input/', function (req, res) {
+ 
+	
+	var reqFile = req.query['filename'];
+	if (!reqFile)
+		reqFile="add.pdf"; // defaults to add.pdf
+		
+	var reqUrl = req.query['url'];
+	if (!reqUrl) 
+		reqUrl ="";
+	
+			console.log("POST /pdf/input/&filename="+reqFile+"&url="+reqUrl);		
+		
+	var file = fs.createWriteStream(reqFile);
+	var request = http.get(reqUrl, function(response) {
+  		response.pipe(file);
+	});
+	
+	res.end();
+});
+
 
 // sample: return a QR code in png:	
 app.get('/qr', function (req, res) {

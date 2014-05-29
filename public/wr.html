@@ -14,11 +14,20 @@
 				<button data-bind="click: wsTestData">Test data</button>
 			</div>
 		</div>
-		
 		-->
-		<!-- Result list: A table -->
-		 
+		<div class="msgframe" >
+				<div class="msghead"><strong>Add document</strong></div>
+				<div class="msgcontent">
+				from url: <input data-bind="value: $root.docUrlToAdd">
+				</input> title: <input data-bind="value:$root.docTitleToAdd"></input>
+				<button data-bind="click: $root.addDocument">Add</button>
+				</div>
+		</div>
+			</div>
 
+		
+		<!-- Result list: A table -->
+		 	
 
 	<!-- result list -->
 	  <div data-bind="visible:$root.viewerVisible()==false">
@@ -45,7 +54,6 @@
 			</table>
 			
 		
-	
 	<!-- selected item detail-->
 
 		<div class="msgframe" data-bind="visible: $root.selectedRow()==false">
@@ -92,13 +100,13 @@
 			
 			<div>
 				<button data-bind="click: $root.perMail">Send me</button>
+			
 				<div class="bottomPager"><span><button data-bind="click: $root.prevPage">-</button><span class="pagenum" data-bind="text: $root.page"></span></span><span><button data-bind="click: $root.nextPageTop">+</button></span><div>
 				
 			</div>
 				
-		</div>
 		
-				
+		
 	</body>
 
 </html>
@@ -115,6 +123,13 @@
 
 
 		var self=this;
+	
+	
+		// tracks URL of document to add
+		self.docUrlToAdd = ko.observable();
+	
+		// tracks title of document to add
+		self.docTitleToAdd = ko.observable();
 	
 		// tracks current document PDF properties
 		self.pdfProps = ko.observable();
@@ -261,6 +276,11 @@
 		});
 */
 
+		self.addDocument = function() {
+				self.items.push({'DocumentType': 'Unknown','Title': self.docTitleToAdd(), 'Format':'pdf', '_id':self.docTitleToAdd()});
+				$.post("/pdf/input/?filename="+self.docTitleToAdd()+"&url="+self.docUrlToAdd()); 
+		}
+	
 		self.populate = function() {
 			 //self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Form A','Signed':'02.04.2014', 'Scanned':'03.04.2014', 'RunNr':'3454', '_id':1});
 			 //self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Procuration','Signed':'03.04.2014', 'Scanned':'04.04.2014', 'RunNr':'5012', '_id':2});
