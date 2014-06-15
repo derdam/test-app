@@ -53,44 +53,36 @@
 			    </tbody>
 			</table>
 			
-		
-	<!-- selected item detail-->
+		</div>
+	<!-- selected item detail-
 
-		<div class="msgframe" data-bind="visible: $root.selectedRow()==false">
+		<div class="msgframe" data-bind="visible: $root.selectedRow()">
 			<div class="msghead"><strong>Details</strong></div>
 			<div class="msgcontent">
-				<!-- span data-bind="text: $root.getCol('_id')"></span -->
+				<span data-bind="with: $root.viewerSettings()">
+					filename: <span data-bind="text: filename"></span>
+					page: <span data-bind="text: page"></span>
+					rotation: <span data-bind="text: rotation"></span>
+				</span>
 				<div/>
-				<!-- vertical display of row properties -->
-				<table>
-					 <tbody data-bind="foreach: $root.columnNames">
-			        		<tr class="resrow">
-			            			<td class="rescell">
-								<div><span data-bind="text: $data.colname"></span></div>
-							</td>
-							<td class="rescell">
-								<div><span data-bind="text: $root.getCol($data.colname)"></span></div>
-							</td>
-			        		</tr>
-			    		</tbody>
-				</table>
-			
+				
 			</div>
 
 		</div>
-	</div>
+	->
 </div>
         <!-- selected document options --> 
 	<a name="preview"></a>
 		<div class="msgframe" data-bind="visible: $root.selectedRow()">
 			<div class="msghead" data-bind="click: $root.closeViewer, visible:$root.viewerVisible()==false">
 				<button data-bind="click: $root.toggleZoom">zZz</button>
-				&nbsp page<span><button data-bind="click: $root.prevPage">-</button><input class="pagenum" data-bind="value: $root.page"></span></span><span><button data-bind="click: $root.nextPage">+</button></span>
-			&nbsp rot<span><button data-bind="click: $root.rotL">-</button><input class="rotation" data-bind="value: $root.rotation"></span></span><span><button data-bind="click: $root.rotR">+</button></span>
-					&nbsp zoom<span><button data-bind="click: $root.zoomOut">-</button><input class="density" data-bind="value: $root.viewerDensityF"></input></span><span><button data-bind="click: $root.zoomIn">+</button></span>
-				&nbsp gray<span><button data-bind="click: $root.grayscaleD">-</button><input class="gamma" data-bind="value: $root.grayscale"></span></span><span><button data-bind="click: $root.grayscaleE">+</button></span>
-		&nbsp gamma<span><button data-bind="click: $root.gammaD">-</button><input class="gamma" data-bind="value: $root.gamma"></span></span><span><button data-bind="click: $root.gammaI">+</button></span>
-		
+				&nbsp page<span><button data-bind="click: $root.prevPage">-</button> <button data-bind="click: $root.nextPage">+</button> <input class="pagenum" data-bind="value: $root.newPage"></span></span>
+			
+			&nbsp orientation<span><button data-bind="click: $root.rot(-90)">-90°</button>
+						<button data-bind="click: $root.rot(-0.2)">-</button>
+						<button data-bind="click: $root.rot(0.2)">+</button>
+						<button data-bind="click: $root.rot(90)">+90°</button></span>
+
 			</div>
 			<a name="pageTop"></a>
 			<div class="preview">
@@ -101,7 +93,7 @@
 			<div>
 				<button data-bind="click: $root.perMail">Send me</button>
 			
-				<div class="bottomPager"><span><button data-bind="click: $root.prevPage">-</button><span class="pagenum" data-bind="text: $root.page"></span></span><span><button data-bind="click: $root.nextPageTop">+</button></span><div>
+				<div data-bind="with: $root.viewerSettings", class="bottomPager"><span><button data-bind="click: $root.prevPageTop">-</button><span class="pagenum" data-bind="text: $root.newPage"></span></span><span><button data-bind="click: $root.nextPageTop">+</button></span><div>
 				
 			</div>
 				
@@ -121,9 +113,7 @@
         // Here's my data model
         var viewModel = function () {
 
-
 		var self=this;
-	
 	
 		// tracks URL of document to add
 		self.docUrlToAdd = ko.observable();
@@ -137,9 +127,16 @@
 		// tracks viewer visibility	
 		self.viewerVisible = ko.observable();
 	  
-		// viewer density factor, for preview and view
-		self.viewerDensityF = ko.observable(1.0);
+		// tracks viewer settings (document, page, zoom, ...)
+		// so that dependant observables like getThumbUrl() can be triggered only once for many settings changes
+ 		self.viewerSettings = ko.observable( {filename:undefined, page:1, rotation:undefined} );
+
+		self.viewerSettingsJ = ko.computed(function() {
+			return JSON.stringify(self.viewerSettings());
+		})
+
 	
+		// tracks zoom for thumbnails and page preview
 		self.zoom = ko.observable(false);
 	
 		// toggles between thumbnails and page preview	
@@ -147,98 +144,80 @@
 			self.zoom(!self.zoom());
 		};
 		
-	
-		// preview thumbnails density
-		self.viewerDensityP = ko.computed(function() {
-			return Math.round(24 * self.viewerDensityF());
-		});
-	
-		// observes rotation angle
-		self.rotation = ko.observable(0);
+//// TODO : Remove page and work directly on viewerSettings
 
-		// rotates the document clockwise +90°
-		self.rotR = function() {
-			var angle = self.rotation();
-			angle = angle + 90;
-			if (angle>=360)
-				angle=0;
-			self.rotation(angle);
-		};
-	
-		// rotate the document counterclockwise -90°
-		self.rotL = function() {
-			var angle = self.rotation();
-			angle = angle - 90;
-			if (angle<=-360)
-				angle=0;
-			self.rotation(angle);
-		};
-	
-	
-		// observes gamma correction
-		self.gamma = ko.observable(1.0);
+		/*
+		self.pager = ko.computed(function() {
+			var p = self.viewerSettings().page;
+			alert(p);
+			return p;
+		})
+		*/
 		
-		self.gammaD = function() {
-			self.gamma(self.gamma()-0.1);
-		};
-	
-		self.gammaI = function() {
-			self.gamma(self.gamma()+0.1);
-		};
-	
-	   // observes grayscale switch
-		self.grayscale = ko.observable(false);
-	
-		self.grayscaleD = function () {
-			self.grayscale(false);
-		};
-	
-		self.grayscaleE = function () {
-			self.grayscale(true);
-		};
-	
-		// tracks displayed page number
-		self.page = ko.observable(1);
-	
+		self.newPage = ko.observable(1);
+
+		self.goPage = ko.computed(function() {
+			//alert(self.newPage());
+			var vs = { filename: self.viewerSettings().filename, page: parseInt(self.newPage()), rotation:self.viewerSettings().rotation };
+				self.viewerSettings(vs);
+				//self.newPage(page);	
+		})
+		
 		// display previous page
-		self.prevPage = function()
-		{
-			self.page(parseInt(self.page()));
-			if (self.page()>2)
-				self.page(self.page()-2);
-		};
+		self.prevPage = function() 
+		{	
+			var page = self.viewerSettings().page;
+			if (page>2) {
+				page-=2;
+				var vs = { filename: self.viewerSettings().filename, page: page, rotation:self.viewerSettings().rotation };
+				self.viewerSettings(vs);
+				self.newPage(page);	
+			}
+		}
 	
-	   // display next page
+	  	 // display next page
 		self.nextPage = function()
 		{
-				self.page(parseInt(self.page()));
-				self.page(self.page()+2);
+			var page = self.viewerSettings().page+2;
+			var vs = { filename: self.viewerSettings().filename, page: page , rotation:self.viewerSettings().rotation };
+			self.viewerSettings(vs);
+			self.newPage(page);
 		};
 	
 		// display next page and pan the client to the top of the page
 		self.nextPageTop = function()
-		{	
+		{
 			self.nextPage();
-			window.location = '#pageTop'; //'#preview' //'#pageTop';			
+			window.location = '#pageTop'; //'#preview' //'#pageTop';
+						
+		}
+
+		// display previous page and pan the client to the top of the page
+		self.prevPageTop = function()
+		{
+			self.prevPage();
+			window.location = '#pageTop'; //'#preview' //'#pageTop';
+						
 		}
 	
-		/* 20140501 - obsolete 
-		// viewer rendering quality (80 seems a good time/size compromsise)
-		//self.viewerQuality = ko.observable(80);
-	
-	    // called when user selects low quality rendering in viewer
-		self.viewerQualityL = function() {
-			self.viewerQuality(20);
+		// rotates page offset in degrees
+		self.rot = function(offset) {
+			var rot = self.viewerSettings().rotation;
+			rot+=offset;
+			if (rot>360 || rot<-360)
+			{
+				rot=0;
+			}
+			var vs = { filename: self.viewerSettings().filename, page: self.viewerSettings().page , rotation:rot};
+			self.viewerSettings(vs);
 		}
-	
-	 	// called when user selects low quality rendering in viewer
-		self.viewerQualityH = function() {
-			self.viewerQuality(80);
-		}
-		*/
+
+
 		
+
+
 		// tracks resultlist items
-        self.items = ko.observableArray();
+        	self.items = ko.observableArray();
 	
 		// track column names based on 1st item in items
 		self.columnNames = ko.computed(function() {
@@ -270,11 +249,6 @@
 			}
 		};
   
-/*
-		self.selectedRowJ = ko.computed(function() {
-			return  JSON.stringify(self.selectedRow());
-		});
-*/
 
 		self.addDocument = function() {
 				self.items.push({'DocumentType': 'Unknown','Title': self.docTitleToAdd(), 'Format':'pdf', '_id':self.docTitleToAdd()});
@@ -282,27 +256,20 @@
 		}
 	
 		self.populate = function() {
-			 //self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Form A','Signed':'02.04.2014', 'Scanned':'03.04.2014', 'RunNr':'3454', '_id':1});
-			 //self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Procuration','Signed':'03.04.2014', 'Scanned':'04.04.2014', 'RunNr':'5012', '_id':2});
-			 //self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'Non-US Disclosure','Signed':'03.04.2014', 'Scanned':'04.04.2014', 'RunNr':'3654', '_id':3});
-			 //self.items.push({'Portfolio': '1001001','Pseudonym': 'LUNA', 'DocumentType':'E-Banking contract','Signed':'04.04.2014', 'Scanned':'05.04.2014', 'RunNr':'5097', '_id':4});
-						
-			// self.items.push({'Artist': 'Brahms','Album': 'Klavierkonzert 1', 'DocumentType':'MP3'});
-			// self.items.push({'Artist': 'Wagner','Album': 'Die Walkürie', 'DocumentType':'CD'});
-			// self.items.push({'Artist': 'Portishead','Album': 'Dummy', 'DocumentType':'WAV'});
+			
 	
-			self.items.push({'DocumentType': 'Whitepaper','Title': 'Trace-based JIT Type Specialization for Dynamic Languages', 'Format':'pdf', '_id':'test.pdf'});
-			self.items.push({'DocumentType': 'Book','Title': 'The Holy Bible - Catholic Public Domain Version (original)', 'Format':'pdf', '_id':'bible.pdf'});
+			self.items.push({'DocumentType': 'Article','Title': 'Trace-based JIT Type Specialization for Dynamic Languages', 'Format':'pdf', '_id':'test.pdf' });
+			self.items.push({'DocumentType': 'Book','Title': 'The Holy Bible - Catholic Public Domain Version (original)', 'Format':'pdf', '_id':'bible.pdf', viewerSettings: {'grayscale':true} });
 			self.items.push({'DocumentType': 'Catalog','Title': 'Prince Spring 2013 Catalogue', 'Format':'pdf', '_id':'catalog.pdf'});
 			self.items.push({'DocumentType': 'Catalog','Title': 'Seldenmast', 'Format':'pdf', '_id':'yacht.pdf'});
 			
 			self.items.push({'DocumentType': 'Article','Title': 'Valves at Low Plate Voltage (1 of 2)', 'Format':'pdf', '_id':'low-anode-1.pdf'}); 			
 			self.items.push({'DocumentType': 'Article','Title': 'Valves at Low Plate Voltage (2 of 2)', 'Format':'pdf', '_id':'low-anode-2.pdf'});
- 			self.items.push({'DocumentType': 'Microfilm','Title': 'The Chicago Maroon', 'Format':'pdf', '_id':'article.pdf'});
-			self.items.push({'DocumentType': 'Book','Title': 'L.F. Céline - Voyage au bout de la nuit', 'Format':'pdf', '_id':'celine-voyage.pdf'});
-			self.items.push({'DocumentType': 'Article','Title': 'Emetteur National de Sottens (R. Pièce, 1938)', 'Format':'pdf', '_id':'sottens-1938.pdf'});
-			self.items.push({'DocumentType': 'Article','Title': 'Emetteur National de Sottens (E. Mettzler, H. Haffolter, 1940)','Format':'pdf', '_id':'sottens-1940.pdf'});
-			self.items.push({'DocumentType': 'Article','Title': 'Emetteur National de Sottens (R. Pièce, 1954)','Format':'pdf', '_id':'sottens-1954.pdf'});
+ 			self.items.push({'DocumentType': 'Archive','Title': 'The Chicago Maroon', 'Format':'pdf', '_id':'article.pdf' });
+			self.items.push({'DocumentType': 'Book','Title': 'L.F. Céline - Voyage au bout de la nuit', 'Format':'pdf', '_id':'celine-voyage.pdf', viewerSettings: {'grayscale':true} });
+			self.items.push({'DocumentType': 'Archive','Title': 'Emetteur National de Sottens (R. Pièce, 1938)', 'Format':'pdf', '_id':'sottens-1938.pdf'});
+			self.items.push({'DocumentType': 'Archive','Title': 'Emetteur National de Sottens (E. Mettzler, H. Haffolter, 1940)','Format':'pdf', '_id':'sottens-1940.pdf'});
+			self.items.push({'DocumentType': 'Archive','Title': 'Emetteur National de Sottens (R. Pièce, 1954)','Format':'pdf', '_id':'sottens-1954.pdf'});
 		
 			// tube-oscillators.pdf
 			self.items.push({'DocumentType': 'Book','Title': 'Vacuum Tubes Oscillators','Format':'pdf', '_id':'tube-oscillators.pdf'});
@@ -311,7 +278,7 @@
 			self.items.push({'DocumentType': 'Book','Title': 'ARRL Radio Amateur Handbook (1936)','Format':'pdf', '_id':'arrl-1936.pdf'});
 	
 	 		// spark-transmitter.pdf
-			self.items.push({'DocumentType': 'Book extract','Title': 'Spark transmitter','Format':'pdf', '_id':'spark-transmitter.pdf'});
+			self.items.push({'DocumentType': 'Archive','Title': 'Spark transmitter','Format':'pdf', '_id':'spark-transmitter.pdf'});
 	
 	
 			// raspail-camp-des-saints.pdf (1973) ISBN 978-2-221-12396-6
@@ -323,76 +290,49 @@
 // Event handlers
 
 
-		// called when user decrease resolution in viewer
-
-		self.zoomOut = function() {
-			var dpi = self.viewerDensityF();
-			if (dpi > 0.2) {
-				dpi = dpi - 0.1;
-				self.viewerDensityF(dpi);	
-			}
-		};
-	
-		self.zoomIn = function() {
-			var dpi = self.viewerDensityF();
-			if (dpi < 10.0) {
-				dpi = dpi + 0.1;
-				self.viewerDensityF(dpi);	
-			}
-		};
-
+		
 	
 		// called when user selects a row in result list
 		self.selRow = function(row) {
 			self.selectedRow(row);
+			var id = row['_id'];
+			if (id)
+				self.viewerSettings({filename:id, page:1, rotation:0});
+			else
+				self.viewerSettings({filename:undefined, page:1, rotation:0});
+
+			self.newPage(1);
+
 			// window.location = "#preview";
 		};
 
-	    // called when user clicks the 'open' button in preview pane	
-		// Remove because the goal of this app is to avoid opening the PDF directly.
-	/*
-		self.openDoc = function() {
-			var id = self.getCol('_id');
-			if (id) {
-				window.location.href = "../"+id.toString();	
-			}
-		}
-
-	*/
 		// called when the user closes the viewer	
 		self.closeViewer = function() {
 			self.viewerVisible(false);
 		}
 	
-	/*
-	
-		self.docViewPage = ko.observable(1);
-	
-		self.getDocViewUrl = ko.computed(function() {
-			
-						return "../pdf?density=150"+"&page="+self.docViewPage()+'&quality='+self.viewerQuality();	
-
-		});
-	*/
 	
 		self.getThumbUrl = function(docid, page) {
-			var extra = "";
-			if (self.grayscale()==true) {
-				extra=extra+"&grayscale=true";
+			var dt = self.getCol('DocumentType');
+			var extra = '';
+			if (dt) {
+				if (dt==='Book' | dt==='Archive') {
+					extra = "&grayscale=true";
+					if (dt==='Archive') {
+						extra = extra + "&gamma=0.7";					
+					}
+				}
+				
 			}
-	
-			extra = extra + "&zoom=" + self.zoom();
-			//self.updateDocPdfProps(docid);
-			return "../pdf?density="+self.viewerDensityP()+"&filename="+docid+"&page="+page.toString()+"&rotate="+self.rotation()+"&gamma="+self.gamma()+extra; //+'&quality='+self.viewerQuality();	
+			return "../pdf?filename="+docid+"&page="+page.toString() + "&zoom=" + self.zoom()+"&rotate="+self.viewerSettings().rotation+extra;
 		};
 	
 
 		self.getThumbUrl0 = ko.computed(function() {
 			var id = self.getCol('_id');
 			if (id) {
-				// return "../pdf?density="+self.viewerDensityP()+"&page="+id.toString()+'&quality='+self.viewerQuality();	
 				
-				var ret = self.getThumbUrl(id,self.page());
+				var ret = self.getThumbUrl(id, self.viewerSettings().page);
 				// self.putRemoteViewer(ret);
 			
 				return ret;
@@ -400,14 +340,14 @@
 		});
 
 
-	    self.updateDocPdfProps = function(docid) {
-			$.get("../pdf/info/?filename="+docid+"&page="+self.page(), self.pdfProps);
+	   	self.updateDocPdfProps = function(docid) {
+			$.get("../pdf/info/?filename="+docid+"&page="+self.viewerSettings().page(), self.pdfProps);
 		}
 	
 		self.getThumbUrl1 = ko.computed(function() {
 			var id = self.getCol('_id');
 			if (id) {
-				return self.getThumbUrl(id,parseInt(self.page())+1);
+				return self.getThumbUrl(id,self.viewerSettings().page+1);
 			}
 		});
 	

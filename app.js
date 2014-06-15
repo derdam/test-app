@@ -191,6 +191,16 @@ app.get('/pdf', function (req,res) {
 
 	// check this for a better approach: http://docs.nodejitsu.com/articles/advanced/streams/how-to-use-stream-pipe
 	
+// input file for pdfdraw command
+		var pIn = reqFile;
+		
+		
+
+		// on linux/ubuntu we use /dev/shm RAM storage for temporary files.
+		var pOut = "/dev/shm/"+pIn+"."+reqPage.toString()+"-"+pdfcount.toString()+".png";
+		//spawn("mkfifo", [pOut]);
+
+
 
 	// Callback - serve the requested page.
 	var doServe = function() {
@@ -201,11 +211,6 @@ app.get('/pdf', function (req,res) {
 		res.header("Cache-Control", "no-cache, no-store");
 		
 			
-		// input file for pdfdraw command
-		var pIn = reqFile;
-		
-		// on linux/ubuntu we use /dev/shm RAM storage for temporary files.
-		var pOut = "/dev/shm/"+pIn+"."+reqPage.toString()+"-"+pdfcount.toString()+".png";
 		// ghostscript, via convert: cnv = spawn('convert', ['-density',reqDens.toString(), '-quality',reqQual,pIn, pOut]);
 		// pdfdraw (mu-pdftools)
 		if (true) // | reqPage<pp.pages) // (! fs.existsSync(pOut)) {
@@ -222,6 +227,7 @@ app.get('/pdf', function (req,res) {
 			
 			cnv.on('err', function (err) {
 			});
+			
 			
 			cnv.on('exit', function (code) {
 		  		console.log('convert process exited with code ' + code);
@@ -257,6 +263,8 @@ app.get('/pdf', function (req,res) {
 	// compute pdfinfo key for cache retrieval
 	var pik = reqFile; // we use filename as key
 	var pif  = pgInfoCache[pik];
+
+	var DPI = 108; //  108 for 2 A4 pages
 	
 	//console.log('pif= '+pif);
 	
@@ -268,7 +276,7 @@ app.get('/pdf', function (req,res) {
 				if (reqZoom=="true")
 					zf=1.0;
 					
-				reqDens=Math.round(108*pif.pageDpiFactor*zf); // 108 for 2 A4 pages on a 
+				reqDens=Math.round(DPI*pif.pageDpiFactor*zf); // scale
 				// invoke callback for serving page:
 				doServe();
 		
@@ -306,7 +314,7 @@ app.get('/pdf', function (req,res) {
 				if (reqZoom=="true")
 					zf=1.0;
 					
-				reqDens=Math.round(108*pp.pageDpiFactor*zf); // 108 for 2 A4 pages on a 
+				reqDens=Math.round(DPI*pp.pageDpiFactor*zf); // scale
 				// invoke callback for serving page:
 				doServe();
 			}
@@ -567,8 +575,8 @@ app.get('/permail', function (req, res) {
 	if (!reqFile)
 		reqFile="test.pdf"; // defaults to test.pdf
 	
-	console.log("creating qrindex.png for document "+reqFile);
-	var qrcode = qr.image('data:'+reqFile, {type:'png'});
+	//console.log("creating qrindex.png for document "+reqFile);
+	//var qrcode = qr.image('data:'+reqFile, {type:'png'});
 	
 	// setup e-mail data with unicode symbols
 	var mailOptions = {
@@ -581,10 +589,6 @@ app.get('/permail', function (req, res) {
 	    	{   // file on disk as an attachment
             	fileName: reqFile,
             	filePath: reqFile // stream this file
-        	},
-        	{   // use URL as an attachment
-            	fileName: "qrindex.png",
-            	filePath: "qrindex.png"
         	}
 	    ]
 	}
