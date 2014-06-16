@@ -76,7 +76,7 @@
 		<div class="msgframe" data-bind="visible: $root.selectedRow()">
 			<div class="msghead" data-bind="click: $root.closeViewer, visible:$root.viewerVisible()==false">
 				<button data-bind="click: $root.toggleZoom">zZz</button>
-				&nbsp page<span><button data-bind="click: $root.prevPage">-</button> <button data-bind="click: $root.nextPage">+</button> <input class="pagenum" data-bind="value: $root.newPage"></span></span>
+				&nbsp page<span><button data-bind="click: $root.prevPage">-</button><input class="pagenum" data-bind="value: $root.newPage"></input> <button data-bind="click: $root.nextPage">+</button> </span></span>
 			
 			&nbsp orientation<span><button data-bind="click: $root.rot(-90)">-90°</button>
 						<button data-bind="click: $root.rot(-0.2)">-</button>

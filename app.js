@@ -128,6 +128,16 @@ var pdfcount=0;
 // a collection of pageinfo request/responses to be used as a simple cache.
 var pgInfoCache = {};
 
+var deleteFile = function(fileName) {
+	// console.log('Cleaning '+fileName+' ..');
+	 fs.unlink(fileName, function (err) {
+	 	if (!err)
+		  console.log('Cleaned '+fileName+' successfully.\n');
+		else
+		  console.log('Cleaning '+fileName+' failed: '+err);
+	});	
+}
+
 // sample: return  page of a pdf in png:
 app.get('/pdf', function (req,res) {
 
@@ -204,56 +214,68 @@ app.get('/pdf', function (req,res) {
 
 	// Callback - serve the requested page.
 	var doServe = function() {
-		//console.log("doServe");
-		// serve pdf page
+	
+		// response content type is png
 		res.type('png');
 		
+		// tell client to not cache response
 		res.header("Cache-Control", "no-cache, no-store");
 		
 			
 		// ghostscript, via convert: cnv = spawn('convert', ['-density',reqDens.toString(), '-quality',reqQual,pIn, pOut]);
+
 		// pdfdraw (mu-pdftools)
 		if (true) // | reqPage<pp.pages) // (! fs.existsSync(pOut)) {
+
+			// set converter options
+			var cnvOptions;	
+
 			if (!reqGs) 
-				cnv = spawn('pdfdraw', ['-G',reqGamma,'-R',reqRot,'-r',reqDens,'-o',pOut,pIn,reqPage+1]);
+				cnvOptions = ['-G',reqGamma,'-R',reqRot,'-r',reqDens,'-o',pOut,pIn,reqPage+1];
 			else
-				cnv = spawn('pdfdraw', ['-G', reqGamma,'-g', '-R',reqRot,'-r',reqDens,'-o',pOut,pIn,reqPage+1]);
-				
-			cnv.stdout.on('data', function(data) {
-				console.log('stdout: data received.');
-				//res.pipe(data);
-				
+				cnvOptions = ['-G', reqGamma,'-g', '-R',reqRot,'-r',reqDens,'-o',pOut,pIn,reqPage+1];
+
+
+			// create a named pipe for page output.-m parameters stands for
+			// chmod 600 on linux, rw only for owner
+			console.log('create pipe (mkfifo) '+pOut);
+			var ppipe=spawn("mkfifo", ['-m',600,pOut]);
+			ppipe.on('err', function (err) {
+				console.log('mkfifo process exited with error: '+err);
 			});
 			
-			cnv.on('err', function (err) {
-			});
-			
-			
-			cnv.on('exit', function (code) {
-		  		console.log('convert process exited with code ' + code);
+
+			// on success, create a readStream on pipe
+			ppipe.on('exit', function (code) {
+		  		console.log('mkfifo process exited with code ' + code);
+				
 				if (code==0) {
-				  var rs = fs.createReadStream(pOut);
-				  
-				  // ask stream to remove sent file when pipe is completed.
-				  rs.on('end', function() {
-				  
-					 console.log('Cleaning '+pOut+' ..');
-					 fs.unlink(pOut, function (err) {
-		  				if (!err)
-		  					console.log('successfully deleted.\n');
-		  					// else: forget deliberatly.
-					  });				 
-					  
-				  });
-		
-				  rs.pipe(res);	
-				} else {
-					res.end();
-					fs.unlink(pOut, function (err) {
-		  				if (!err)
-		  					console.log('successfully deleted.\n');
-		  					// else: forget deliberatly.
-					 });				 
+
+					// create a stream that can read the named pipe pOut
+					var rs = fs.createReadStream(pOut);
+
+					// ask stream to remove named pipe when streaming is completed.
+				  	rs.on('end', function() {
+						console.log(pOut+' streamed. Deleting..');
+						deleteFile(pOut);
+				 	});
+
+					// ask stream to report error and remove named pipe on error
+					rs.on('err', function() {
+						console.log(pOut+ ' error streaming : '+err);
+						deleteFile(pOut);
+					});
+
+					// connect stream that reads pOut to response
+					rs.pipe(res);
+						
+					// start pdf page extraction, output will be the named pipe pOut.
+					// Extraction result is piped to pOut, that is also piped to response.
+					cnv = spawn('pdfdraw', cnvOptions);
+				}
+				else {
+					console.log('error: deleting '+pOut);
+					deleteFile(pOut);
 				}
 			});
 			
