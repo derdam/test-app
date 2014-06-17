@@ -261,7 +261,7 @@ app.get('/pdf', function (req,res) {
 				 	});
 
 					// ask stream to report error and remove named pipe on error
-					rs.on('err', function() {
+					rs.on('error', function() {
 						console.log(pOut+ ' error streaming : '+err);
 						deleteFile(pOut);
 					});
