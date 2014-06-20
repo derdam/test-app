@@ -132,9 +132,9 @@ var deleteFile = function(fileName) {
 	// console.log('Cleaning '+fileName+' ..');
 	 fs.unlink(fileName, function (err) {
 	 	if (!err)
-		  console.log('Cleaned '+fileName+' successfully.\n');
+		  console.log('deleted '+fileName+' successfully.\n');
 		else
-		  console.log('Cleaning '+fileName+' failed: '+err);
+		  console.log('deleting '+fileName+' failed: '+err);
 	});	
 }
 
@@ -236,9 +236,9 @@ app.get('/pdf', function (req,res) {
 				cnvOptions = ['-G', reqGamma,'-g', '-R',reqRot,'-r',reqDens,'-o',pOut,pIn,reqPage+1];
 
 
-			// create a named pipe for page output.-m parameters stands for
+			// create a named pipe for page output. -m parameters stands for
 			// chmod 600 on linux, rw only for owner
-			console.log('create pipe (mkfifo) '+pOut);
+			//console.log('create pipe (mkfifo) '+pOut);
 			var ppipe=spawn("mkfifo", ['-m',600,pOut]);
 			ppipe.on('err', function (err) {
 				console.log('mkfifo process exited with error: '+err);
@@ -247,7 +247,7 @@ app.get('/pdf', function (req,res) {
 
 			// on success, create a readStream on pipe
 			ppipe.on('exit', function (code) {
-		  		console.log('mkfifo process exited with code ' + code);
+		  		//console.log('mkfifo process exited with code ' + code);
 				
 				if (code==0) {
 
@@ -292,7 +292,7 @@ app.get('/pdf', function (req,res) {
 	
 	if (pif) {
 		console.log("pgInfoCache HIT for pik "+pik);
-		console.log('data: '+pif.pageDpiFactor);
+		//console.log('data: '+pif.pageDpiFactor);
 				var zf = 0.25;
 				
 				if (reqZoom=="true")
@@ -330,7 +330,7 @@ app.get('/pdf', function (req,res) {
 					pgInfoCache[pik] = pp;
 				}
 				
-				console.log('data: '+pp.pageDpiFactor);
+				// console.log('data: '+pp.pageDpiFactor);
 				var zf = 0.25;
 				
 				if (reqZoom=="true")
