@@ -31,6 +31,8 @@ console.log('Server running, listening on port '+(port+1)+' for https.');
 
 
 
+// retrieve gmail password from parameters
+
 var args = process.argv.slice(2);
 // console.log('args: '+args);
 
