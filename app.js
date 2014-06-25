@@ -256,7 +256,7 @@ app.get('/pdf', function (req,res) {
 
 					// ask stream to remove named pipe when streaming is completed.
 				  	rs.on('end', function() {
-						console.log(pOut+' streamed. Deleting..');
+						//console.log(pOut+' streamed. Deleting..');
 						deleteFile(pOut);
 				 	});
 
@@ -272,6 +272,11 @@ app.get('/pdf', function (req,res) {
 					// start pdf page extraction, output will be the named pipe pOut.
 					// Extraction result is piped to pOut, that is also piped to response.
 					cnv = spawn('pdfdraw', cnvOptions);
+					cnv.on('error', function() {
+						console.log(pOut+ 'error spawning pdfdraw '+pIn+' to '+pOut+' : '+err);
+						deleteFile(pOut);
+					});
+
 				}
 				else {
 					console.log('error: deleting '+pOut);

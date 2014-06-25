@@ -14,17 +14,7 @@
 				<button data-bind="click: wsTestData">Test data</button>
 			</div>
 		</div>
-		-->
-		<div class="msgframe" >
-				<div class="msghead"><strong>Add document</strong></div>
-				<div class="msgcontent">
-				from url: <input data-bind="value: $root.docUrlToAdd">
-				</input> title: <input data-bind="value:$root.docTitleToAdd"></input>
-				<button data-bind="click: $root.addDocument">Add</button>
-				</div>
-		</div>
-			</div>
-
+		
 		
 		<!-- Result list: A table -->
 		 	
@@ -93,12 +83,21 @@
 			<div>
 				<button data-bind="click: $root.perMail">Send me</button>
 			
-				<div data-bind="with: $root.viewerSettings", class="bottomPager"><span><button data-bind="click: $root.prevPageTop">-</button><span class="pagenum" data-bind="text: $root.newPage"></span></span><span><button data-bind="click: $root.nextPageTop">+</button></span><div>
+				<div data-bind="with: $root.viewerSettings", class="bottomPager"><span><button data-bind="click: $root.prevPageTop">-</button><span class="pagenum" data-bind="text: $root.newPage"></span></span><span><button data-bind="click: $root.nextPageTop">+</button></span>
 				
-			</div>
-				
-		
-		
+		</div>
+	  </div>
+        </div>
+
+	<div class="msgframe" >
+				<div class="msghead"><strong>Add document</strong></div>
+				<div class="msgcontent">
+				from url: <input data-bind="value: $root.docUrlToAdd">
+				</input> title: <input data-bind="value:$root.docTitleToAdd"></input>
+				<button data-bind="click: $root.addDocument">Add</button>
+				</div>
+		</div>
+	</div>
 	</body>
 
 </html>
@@ -280,6 +279,8 @@
 	 		// spark-transmitter.pdf
 			self.items.push({'DocumentType': 'Archive','Title': 'Spark transmitter','Format':'pdf', '_id':'spark-transmitter.pdf'});
 	
+		 	// abb-rectifers.pdf
+			self.items.push({'DocumentType': 'Catalog','Title': 'ABB Rectifiers','Format':'pdf', '_id':'abb-rectifiers.pdf'});
 	
 			// raspail-camp-des-saints.pdf (1973) ISBN 978-2-221-12396-6
 			self.items.push({'DocumentType': 'Book','Title': 'Jean Raspail - Le camp des saints (1973) -  ISBN 978-2-221-12396-6','Format':'pdf', '_id':'raspail-camp-des-saints.pdf'});
