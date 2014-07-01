@@ -71,8 +71,8 @@ app.post('/admin/mail-pwd', express.bodyParser(), function (req, res) {
 	console.log('POST: /admin/mail-pwd');
 	// console.log('mailpwd: '+req.body.mailpwd);
 	if (req.body.mailpwd) {
-		mailpwd = req.body.mailpwd;
-		console.log("mail-pwd set: ******"); // + mailpwd);
+		mailpwd = req.body.mailpwd.toString();
+		//console.log("mail-pwd set: ******"); // + mailpwd);
 	}
 	
 });
@@ -568,6 +568,7 @@ app.get('/pdf/text', function (req, res) {
 
 
 
+
 // sample: remote viewer
 
 app.post('/remoteviewer', express.bodyParser(), function(req, res) {
@@ -597,7 +598,6 @@ var smtpTransport = nodemailer.createTransport("SMTP",{
 
 app.get('/permail', function (req, res) {
 
-// console.log('mailpwd: '+mailpwd);
 
 	// check if user requested a local file located in current server's current directory
 	var reqFile = req.query['filename'];
@@ -714,3 +714,47 @@ io.sockets.on('connection', function(socket) {
 	});
 
 });
+
+
+
+
+// returns documents list
+app.get("/documents", function(req, res) {
+
+	var items=new Array();
+
+	items.push({'DocumentType': 'Article','Title': 'Trace-based JIT Type Specialization for Dynamic Languages', 'Format':'pdf', '_id':'test.pdf' });
+	items.push({'DocumentType': 'Book','Title': 'The Holy Bible - Catholic Public Domain Version (original)', 'Format':'pdf', '_id':'bible.pdf', viewerSettings: {'grayscale':true} });
+	items.push({'DocumentType': 'Catalog','Title': 'Prince Spring 2013 Catalogue', 'Format':'pdf', '_id':'catalog.pdf'});
+	items.push({'DocumentType': 'Catalog','Title': 'Seldenmast', 'Format':'pdf', '_id':'yacht.pdf'});
+			
+	items.push({'DocumentType': 'Article','Title': 'Valves at Low Plate Voltage (1 of 2)', 'Format':'pdf', '_id':'low-anode-1.pdf'}); 			
+	items.push({'DocumentType': 'Article','Title': 'Valves at Low Plate Voltage (2 of 2)', 'Format':'pdf', '_id':'low-anode-2.pdf'});
+ 	items.push({'DocumentType': 'Archive','Title': 'The Chicago Maroon', 'Format':'pdf', '_id':'article.pdf' });
+	items.push({'DocumentType': 'Book','Title': 'L.F. Céline - Voyage au bout de la nuit', 'Format':'pdf', '_id':'celine-voyage.pdf', viewerSettings: {'grayscale':true} });
+	items.push({'DocumentType': 'Archive','Title': 'Emetteur National de Sottens (R. Pièce, 1938)', 'Format':'pdf', '_id':'sottens-1938.pdf'});
+	items.push({'DocumentType': 'Archive','Title': 'Emetteur National de Sottens (E. Mettzler, H. Haffolter, 1940)','Format':'pdf', '_id':'sottens-1940.pdf'});
+	items.push({'DocumentType': 'Archive','Title': 'Emetteur National de Sottens (R. Pièce, 1954)','Format':'pdf', '_id':'sottens-1954.pdf'});
+		
+	// tube-oscillators.pdf
+	items.push({'DocumentType': 'Book','Title': 'Vacuum Tubes Oscillators','Format':'pdf', '_id':'tube-oscillators.pdf'});
+	
+	// arrl-1936.pdf
+	items.push({'DocumentType': 'Book','Title': 'ARRL Radio Amateur Handbook (1936)','Format':'pdf', '_id':'arrl-1936.pdf'});
+	
+	// spark-transmitter.pdf
+	items.push({'DocumentType': 'Archive','Title': 'Spark transmitter','Format':'pdf', '_id':'spark-transmitter.pdf'});
+	
+	// abb-rectifers.pdf
+	items.push({'DocumentType': 'Catalog','Title': 'ABB Rectifiers','Format':'pdf', '_id':'abb-rectifiers.pdf'});
+	
+	// raspail-camp-des-saints.pdf (1973) ISBN 978-2-221-12396-6
+	items.push({'DocumentType': 'Book','Title': 'Jean Raspail - Le camp des saints (1973) -  ISBN 978-2-221-12396-6','Format':'pdf', '_id':'raspail-camp-des-saints.pdf'});
+
+	// camus-decivilisation.pdf
+	items.push({'DocumentType': 'Book','Title': 'Renaud Camus - Décivilisation (2011)','Format':'pdf', '_id':'camus-decivilisation.pdf'});
+	
+	// return collection as JSON
+	res.json(items);
+});
+

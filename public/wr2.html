@@ -6,15 +6,16 @@
 	
 	<body>
 	
- 		<!-- Send Message frame. A textbox and a send button. 
+ 		<!-- Login Message frame. A textbox and a send button.
 		<div class="msgframe">
-			<div class="msghead"><strong>Broadcast message</strong></div>
-			<div class="msgcontent">
-				<input data-bind="value: msgToSend" /><button data-bind="click: wsTest">Send</button>
-				<button data-bind="click: wsTestData">Test data</button>
+
+			<div class="msghead"><strong>E-mail</strong></div>
+			<div class="msgitem">
+				<span>Password :<input type="password" data-bind="value: $root.mailPwd"></input></span>
+			<button data-bind="click: setPwd">OK</button>
 			</div>
 		</div>
-		
+		 -->
 		
 		<!-- Result list: A table -->
 		 	
@@ -253,38 +254,23 @@
 				self.items.push({'DocumentType': 'Unknown','Title': self.docTitleToAdd(), 'Format':'pdf', '_id':self.docTitleToAdd()});
 				$.post("/pdf/input/?filename="+self.docTitleToAdd()+"&url="+self.docUrlToAdd()); 
 		}
-	
-		self.populate = function() {
+
+		// retrieve documents list from server		
+		self.getDocuments = function() {
+			var coll;
+			$.get("/documents", function(data, status)
+			{
+				coll = JSON.parse(data);
+				self.items(coll);
+			});
 			
-	
-			self.items.push({'DocumentType': 'Article','Title': 'Trace-based JIT Type Specialization for Dynamic Languages', 'Format':'pdf', '_id':'test.pdf' });
-			self.items.push({'DocumentType': 'Book','Title': 'The Holy Bible - Catholic Public Domain Version (original)', 'Format':'pdf', '_id':'bible.pdf', viewerSettings: {'grayscale':true} });
-			self.items.push({'DocumentType': 'Catalog','Title': 'Prince Spring 2013 Catalogue', 'Format':'pdf', '_id':'catalog.pdf'});
-			self.items.push({'DocumentType': 'Catalog','Title': 'Seldenmast', 'Format':'pdf', '_id':'yacht.pdf'});
-			
-			self.items.push({'DocumentType': 'Article','Title': 'Valves at Low Plate Voltage (1 of 2)', 'Format':'pdf', '_id':'low-anode-1.pdf'}); 			
-			self.items.push({'DocumentType': 'Article','Title': 'Valves at Low Plate Voltage (2 of 2)', 'Format':'pdf', '_id':'low-anode-2.pdf'});
- 			self.items.push({'DocumentType': 'Archive','Title': 'The Chicago Maroon', 'Format':'pdf', '_id':'article.pdf' });
-			self.items.push({'DocumentType': 'Book','Title': 'L.F. Céline - Voyage au bout de la nuit', 'Format':'pdf', '_id':'celine-voyage.pdf', viewerSettings: {'grayscale':true} });
-			self.items.push({'DocumentType': 'Archive','Title': 'Emetteur National de Sottens (R. Pièce, 1938)', 'Format':'pdf', '_id':'sottens-1938.pdf'});
-			self.items.push({'DocumentType': 'Archive','Title': 'Emetteur National de Sottens (E. Mettzler, H. Haffolter, 1940)','Format':'pdf', '_id':'sottens-1940.pdf'});
-			self.items.push({'DocumentType': 'Archive','Title': 'Emetteur National de Sottens (R. Pièce, 1954)','Format':'pdf', '_id':'sottens-1954.pdf'});
 		
-			// tube-oscillators.pdf
-			self.items.push({'DocumentType': 'Book','Title': 'Vacuum Tubes Oscillators','Format':'pdf', '_id':'tube-oscillators.pdf'});
+			
+		}
 	
-			// arrl-1936.pdf
-			self.items.push({'DocumentType': 'Book','Title': 'ARRL Radio Amateur Handbook (1936)','Format':'pdf', '_id':'arrl-1936.pdf'});
-	
-	 		// spark-transmitter.pdf
-			self.items.push({'DocumentType': 'Archive','Title': 'Spark transmitter','Format':'pdf', '_id':'spark-transmitter.pdf'});
-	
-		 	// abb-rectifers.pdf
-			self.items.push({'DocumentType': 'Catalog','Title': 'ABB Rectifiers','Format':'pdf', '_id':'abb-rectifiers.pdf'});
-	
-			// raspail-camp-des-saints.pdf (1973) ISBN 978-2-221-12396-6
-			self.items.push({'DocumentType': 'Book','Title': 'Jean Raspail - Le camp des saints (1973) -  ISBN 978-2-221-12396-6','Format':'pdf', '_id':'raspail-camp-des-saints.pdf'});
-	
+		// sample: add document to items collection
+		self.populate = function() {
+			self.items.push({'DocumentType': 'Article','Title': 'Trace-based JIT Type Specialization for Dynamic Languages', 'Format':'pdf', '_id':'test.pdf' });
 
 		};
 
@@ -375,7 +361,7 @@
 			vm.viewerVisible(false);
         ko.applyBindings(vm); // This makes Knockout get to work
 	
-	vm.populate();
+	vm.getDocuments(); // populate();
 		
  </script>
  
