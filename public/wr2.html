@@ -108,12 +108,15 @@
 <script type='text/javascript', src='js/jquery.js'></script>
 <script type='text/javascript', src='js/knockout-min.js'></script>
 
+
 <script type="text/javascript">
 	
         // Here's my data model
         var viewModel = function () {
 
 		var self=this;
+
+		var oldid = {id:'0'};
 	
 		// tracks URL of document to add
 		self.docUrlToAdd = ko.observable();
@@ -258,9 +261,10 @@
 		// retrieve documents list from server		
 		self.getDocuments = function() {
 			var coll;
-			$.get("/documents", function(data, status)
+			$.get("/resultset", function(data, status)
 			{
 				coll = JSON.parse(data);
+				
 				self.items(coll);
 			});
 			
@@ -351,11 +355,32 @@
 		self.putRemoteViewer = function(docurl) {
 			$.post("remoteviewer", {url: docurl}); // { docid: id, page: displayedpage.toString()});
 		};	
-	
+
+// bad design. Use websocket instead !!
+
+		this.tick = function() {
+			$.get('/resultset/id',function(data, status)
+			{
+				newid = JSON.parse(data);
+				
+				if(newid.id!=oldid.id) {
+					// alert(newid.id);
+					self.getDocuments();
+					self.selectedRow(undefined);	
+					
+				}
+				oldid=newid;
+			});
+		};
+
+
+		setInterval(self.tick, 2000);
+
     };
+
 	
 	
-	
+	// $.post('/resultset', {_id:'test'});
 	
 	var vm = new viewModel();
 			vm.viewerVisible(false);

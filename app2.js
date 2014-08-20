@@ -6,11 +6,33 @@ var httpProxy = require('http-proxy');
 var app = express();
 var fs = require('fs');
 
+
+
+// new try: load config from a file, then from a  pipe.
+
+var scfg = './app-config/config.json';
+
+var cfgs = fs.readFileSync(scfg).toString();
+fs.unlink(scfg);
+
+var cfg = JSON.parse(cfgs);
+
+cfgs = undefined;
+
+
+
+
+
+
+
 // app.use(express.compress());  // compress content
 // app.use(express.cache()); // cache content
 
+app.use(express.bodyParser());
+
+
 // Server setup, including websocket support */
-var host='' //'192.168.1.101'; // address that clients use to connect to this server
+var host = '' //'192.168.1.101'; // address that clients use to connect to this server
 var port = 8080; // port that clients use to connect to this server
 
 var http = require('http');
@@ -23,26 +45,51 @@ var fs = require('fs'); // required to read cert and key files on filesystem
 
 var httpsOpts = {
   key: fs.readFileSync(__dirname +'/ssl/key.pem'),
-  cert: fs.readFileSync(__dirname +'/ssl/cert.pem')
+  passphrase: cfg.sslPrivKeyPwd,
+  cert: fs.readFileSync(__dirname +'/ssl/cert.pem'),
+  requestCert: false, // request client to provide a certificate ?
+  rejectUnauthorized: false // reject unauthaurized acces ?
 };
 
 https.createServer(httpsOpts, app).listen(port+1);
 console.log('Server running, listening on port '+(port+1)+' for https.');
 
+cfg.sslPrivKeyPwd = undefined;
+httpsOpts.passphrase = undefined;
+
+// crypto setup
+var crypto = require('crypto');
 
 
-// retrieve gmail password from parameters
-
-var args = process.argv.slice(2);
-// console.log('args: '+args);
-
-if(args=='') {
-	console.log('WARNING: send per mail will not work: missing parameters.');
+if(cfg.mailPwd == undefined) {
+	console.log('WARNING: send per mail will not work: missing parameters !!');
 }
 
-var mailpwd = args;
 
 
+
+
+// mail password input from node console
+//var pwi = require('./app-modules/input-password.js');
+
+//pwi.foo();
+//var x = pwi.get_password();
+
+
+
+
+
+// mail pwd verification
+var hash = crypto.createHash('sha256').update(cfg.mailPwd).digest('base64');
+
+if (hash=="ySAN1j2rPQeJUhOUvCveTKp1atnUrhpCVDeeEOzRtVY=") {
+	console.log("mail pasword hash verified.");
+} else {
+	console.log("ERROR: send per mail will not work: mail password hash failed verification !!");
+};
+
+
+var items=new Array(); // holds documents list
 
 // Web socket setup
 var io = require('socket.io').listen(server);
@@ -51,6 +98,7 @@ var io = require('socket.io').listen(server);
 
 // provide satic web server. /public is the folder used as root.
 app.use(express.static(__dirname + '/public'));
+
 
 
 // sample: proxying service using 'request' module:
@@ -77,9 +125,63 @@ app.post('/admin/mail-pwd', express.bodyParser(), function (req, res) {
 	
 });
 
+var seq = 1;
+function timestamp () {
+  now = new Date();
+  year = "" + now.getFullYear();
+  month = "" + (now.getMonth() + 1); if (month.length == 1) { month = "0" + month; }
+  day = "" + now.getDate(); if (day.length == 1) { day = "0" + day; }
+  hour = "" + now.getHours(); if (hour.length == 1) { hour = "0" + hour; }
+  minute = "" + now.getMinutes(); if (minute.length == 1) { minute = "0" + minute; }
+  second = "" + now.getSeconds(); if (second.length == 1) { second = "0" + second; }
+  sseq = ""+ seq.toString();
+  seq+=1;
+  return year +month + day + hour + minute + second+'-'+sseq;
+}
+
+
+
 app.post('/pdf/input/', function (req, res) {
- 
+ 	
+	// Add fake document.
+	// This could by achieved by a simple call to items.push(..
+	// *BUT* enclosing this call in a code snippet allow the action
+	// to be executed now or later using eval()
+	// or being appended using a source code template to a new source code version.
+	// 
+
+
+	var reqFile = req.query['filename'];
+	if (reqFile) {
+	console.log('reqfile:'+reqFile);
+
+	var trn = "items.push({'DocumentType': 'Book','Title': 'TEST','Format':'pdf', '_id':'"+reqFile+"'});";
+
+	eval(trn);
+
+
+	fs.readFile('app2.js', 'utf8', function (err,data) {
+  		if (err) {
+    			return console.log(err);
+  		}
+
+  		var tag='@@';
+  		var uwid= 'app2-'+timestamp()+'.js';
+  
+ 		var result = data.replace(new RegExp(tag+'bind-items','g'), uwid+'\n\t'+trn+'\n\t//'+tag+'bind-items');
+
+  		fs.writeFile(uwid, result, 'utf8', function (err) {
+     			if (err) return console.log(err);
+   
+		
+			fs.writeFileSync('app2-'+uwid+'-bak-js', fs.readFileSync('app2.js'));
+			fs.writeFileSync('app2.js', fs.readFileSync(uwid));
 	
+  		});
+
+	});
+	
+	/*
 	var reqFile = req.query['filename'];
 	if (!reqFile)
 		reqFile="add.pdf"; // defaults to add.pdf
@@ -94,8 +196,11 @@ app.post('/pdf/input/', function (req, res) {
 	var request = http.get(reqUrl, function(response) {
   		response.pipe(file);
 	});
-	
+	*/
 	res.end();
+
+}
+	
 });
 
 
@@ -207,7 +312,6 @@ app.get('/pdf', function (req,res) {
 		var pIn = reqFile;
 		
 		
-
 		// on linux/ubuntu we use /dev/shm RAM storage for temporary files.
 		var pOut = "/dev/shm/"+pIn+"."+reqPage.toString()+"-"+pdfcount.toString()+".png";
 		//spawn("mkfifo", [pOut]);
@@ -386,11 +490,14 @@ app.get('/pdf/info', function (req, res) {
 	
 	if (reqPage>0) {
 		cnv = spawn('pdfinfo', ['-f', reqPage, '-l', reqPage, reqFile])
+		
 	} else
 	{
 		cnv = spawn('pdfinfo', [reqFile])
 	}
 	
+
+	//cnv.spawn('./pdfinfo.sh', [reqPage, reqFile])
 		
 	res.type('text');
 	var buf;
@@ -589,10 +696,10 @@ var nodemailer = require("nodemailer");
 
 // create reusable transport method (opens pool of SMTP connections)
 var smtpTransport = nodemailer.createTransport("SMTP",{
-    service: "Gmail",
+    service: cfg.mailService, // "Gmail",
     auth: {
-        user: "damien.derbes@gmail.com",
-        pass: mailpwd // TODO: de-hard code and change e-mail password on this account !!
+        user: cfg.mailUsr, // "damien.derbes@gmail.com",
+        pass: cfg.mailPwd // TODO: de-hard code and change e-mail password on this account !!
     }
 });
 
@@ -717,51 +824,105 @@ io.sockets.on('connection', function(socket) {
 
 
 
+var oldResultset = '';
+var resultsetId = ''; // new Date().getTime().toString();
 
 // returns documents list
 app.get("/documents", function(req, res) {
 
-	var items=new Array();
 
-	items.push({'DocumentType': 'Article','Title': 'Trace-based JIT Type Specialization for Dynamic Languages', 'Format':'pdf', '_id':'test.pdf' });
-	items.push({'DocumentType': 'Book','Title': 'The Holy Bible - Catholic Public Domain Version (original)', 'Format':'pdf', '_id':'bible.pdf', viewerSettings: {'grayscale':true} });
-	items.push({'DocumentType': 'Catalog','Title': 'Prince Spring 2013 Catalogue', 'Format':'pdf', '_id':'catalog.pdf'});
-	items.push({'DocumentType': 'Catalog','Title': 'Seldenmast', 'Format':'pdf', '_id':'yacht.pdf'});
-			
-	items.push({'DocumentType': 'Article','Title': 'Valves at Low Plate Voltage (1 of 2)', 'Format':'pdf', '_id':'low-anode-1.pdf'}); 			
-	items.push({'DocumentType': 'Article','Title': 'Valves at Low Plate Voltage (2 of 2)', 'Format':'pdf', '_id':'low-anode-2.pdf'});
- 	items.push({'DocumentType': 'Archive','Title': 'The Chicago Maroon', 'Format':'pdf', '_id':'article.pdf' });
-	items.push({'DocumentType': 'Book','Title': 'L.F. Céline - Voyage au bout de la nuit', 'Format':'pdf', '_id':'celine-voyage.pdf', viewerSettings: {'grayscale':true} });
-	items.push({'DocumentType': 'Archive','Title': 'Emetteur National de Sottens (R. Pièce, 1938)', 'Format':'pdf', '_id':'sottens-1938.pdf'});
-	items.push({'DocumentType': 'Archive','Title': 'Emetteur National de Sottens (E. Mettzler, H. Haffolter, 1940)','Format':'pdf', '_id':'sottens-1940.pdf'});
-	items.push({'DocumentType': 'Archive','Title': 'Emetteur National de Sottens (R. Pièce, 1954)','Format':'pdf', '_id':'sottens-1954.pdf'});
+	// check if user requested a result set 
+	var resultset = req.query['resultset'];
+	if (!resultset)
+		resultset = 'documents'; // default value
+	
+
+	if (items.length==0 | resultset!=oldResultset) {
+		var dataFilename = './'+resultset+'.json';
+
+	
+		items = JSON.parse(fs.readFileSync(dataFilename));
+		oldResultset=resultset;
+
+
+	
+		// the following comment will be used as a placeholder for injecting external code 
+		// that will manipulate the items collection.
+
+		// the following code is injected by external tool:
+	
 		
-	// tube-oscillators.pdf
-	items.push({'DocumentType': 'Book','Title': 'Vacuum Tubes Oscillators','Format':'pdf', '_id':'tube-oscillators.pdf'});
-	
-	// arrl-1936.pdf
-	items.push({'DocumentType': 'Book','Title': 'ARRL Radio Amateur Handbook (1936)','Format':'pdf', '_id':'arrl-1936.pdf'});
-	
-	// spark-transmitter.pdf
-	items.push({'DocumentType': 'Archive','Title': 'Spark transmitter','Format':'pdf', '_id':'spark-transmitter.pdf'});
-	
-	// abb-rectifers.pdf
-	items.push({'DocumentType': 'Catalog','Title': 'ABB Rectifiers','Format':'pdf', '_id':'abb-rectifiers.pdf'});
-	
-	// raspail-camp-des-saints.pdf (1973) ISBN 978-2-221-12396-6
-	items.push({'DocumentType': 'Book','Title': 'Jean Raspail - Le camp des saints (1973) -  ISBN 978-2-221-12396-6','Format':'pdf', '_id':'raspail-camp-des-saints.pdf'});
+		//@@bind-items
 
-	// camus-decivilisation.pdf
-	items.push({'DocumentType': 'Book','Title': 'Renaud Camus - Décivilisation (2011)','Format':'pdf', '_id':'camus-decivilisation.pdf'});
-
-	// the following comment will be used as a placeholder for injecting external code 
-	// that will manipulate the items collection.
-	//{'bind':'items'}
+	
+	}
 	
 	// return collection as JSON
 	res.json(items);
 });
 
+
+// returns documents list
+app.get("/folder", function(req, res) {
+
+	var ret = new Array(); // holds documents list
+
+	// check if user requested a filter 
+	var filter = req.query['filter'];
+	if (!filter) 
+		filter = ''; // default value
+	
+
+		var dataFilename = __dirname ;
+
+	
+		var files = fs.readdirSync(dataFilename);
+		
+		files = files.filter(function(value) {
+			return value.match(".pdf$")==".pdf";	
+		});
+
+
+		files.forEach(function(entry) {
+    			//console.log(entry);
+			var fst = fs.statSync(entry);
+			
+			var newItem = {filename: entry, size: fst.size, modified: fst.mtime, created: fst.ctime, folder: dataFilename, _id: entry};
+			console.log(JSON.stringify(fst));
+
+			ret.push(newItem);
+
+		});
+	
+		
+	
+	// return collection as JSON
+	res.json(ret);
+});
+
+
+app.get("/quit", function(req, res) {
+	console.log('exiting node.js process with code 0 ..');
+	process.exit(code=0);
+});
+
+
+app.post("/resultset", function (req, res) {
+	
+	 items = req.body;
+	console.log("POST /resultset "+JSON.stringify(items));
+	resultsetId = new Date().getTime().toString();
+	res.json({id:resultsetId});
+});
+
+app.get("/resultset", function(req, res) {
+	res.json(items);
+});
+
+app.get("/resultset/id", function(req, res) {
+	//console.log("GET resultset/id : "+resultsetId);
+	res.json({id:resultsetId});
+});
 
 
 

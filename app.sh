@@ -1,13 +1,26 @@
 #!/bin/bash
-# Script accept password using read commnad for e-mail password passed in parameter to command 'node app.js'
 
-echo Starting node app.js ..
+# This script will decrypt a configuration file and start an app that needs it.
+# Decryption process is kept outside the app, so that a credential is needed to start the app.
 
-# Prompt for password and read it silently from console, storing value in gmailPwd variable
-read -s -p "Gmail account password: " gmailPwd
-echo ""
+# the plain configuration file has been encrypted using the following command:
+# openssl aes-256-cbc -salt -in config.json -out config.json.enc
+# note: a password (strong!) will be prompted for encryption and decryption.
+# this password is used later as the credential needed to start the app.
 
-# start node app.js with gmailPwd variable value as argument
-node app.js $gmailPwd
+
+# create(or replace) pipe for configuration
+rm -f app-config/config.json
+
+mkfifo -m 600 app-config/config.json
+
+# decrypt config file for app
+node app2.js & openssl aes-256-cbc -d -in ./app-config/config.json.enc -out app-config/config.json
+
+# start node app.js. The app will read ./app-config/config.json on startup. 
+
+
+
+
 
 
