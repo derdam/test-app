@@ -844,17 +844,6 @@ app.get("/documents", function(req, res) {
 		items = JSON.parse(fs.readFileSync(dataFilename));
 		oldResultset=resultset;
 
-
-	
-		// the following comment will be used as a placeholder for injecting external code 
-		// that will manipulate the items collection.
-
-		// the following code is injected by external tool:
-	
-		
-		//@@bind-items
-
-	
 	}
 	
 	// return collection as JSON
@@ -909,11 +898,36 @@ app.get("/quit", function(req, res) {
 
 app.post("/resultset", function (req, res) {
 	
-	 items = req.body;
-	console.log("POST /resultset "+JSON.stringify(items));
+	
+	console.log("POST /resultset "+JSON.stringify(req.body));
+	items = req.body;
 	resultsetId = new Date().getTime().toString();
 	res.json({id:resultsetId});
 });
+
+app.put("/resultset", function (req, res) {
+	
+	
+	console.log("PUT /resultset "+JSON.stringify(req.body)); 
+	items.push(req.body);
+	resultsetId = new Date().getTime().toString();
+	res.json({id:resultsetId});
+});
+
+app.post("/resultset/file", function(req,res) {
+	console.log("POST /resultset/");
+	var fn = req.body.filename;
+	res.end();
+	if (fn) {
+		console.log("filename: "+fn);
+		
+		items = JSON.parse(fs.readFileSync(fn));
+
+		resultsetId = new Date().getTime().toString();
+		
+	}
+});
+
 
 app.get("/resultset", function(req, res) {
 	res.json(items);

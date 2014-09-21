@@ -1,0 +1,94 @@
+<html>
+	<head>
+    	<link href="css/style.css" rel="stylesheet" type="text/css">
+		<title>Admin</title>
+	</head>
+	
+	<body>
+	
+ 		<!-- Create a button for each resultset -->
+		<div class="msgframe">
+
+			<div class="msghead"><strong>Resultsets</strong></div>
+			<div class="msgitem", data-bind="click: setDocuments">
+				
+			<p>Documents</p>
+
+			</div>
+			<div class="msgitem", data-bind="click: setTest">
+				
+			<p>Test</p>
+
+			</div>
+		</div>
+		<!--
+		<span data-bind="text: viewerDensityP()"></span>dip&nbsp
+		<span data-bind="text: rotation()"></span>°
+		-->
+		
+	</body>
+
+</html>
+
+
+<!--Include JavaScripts for JQuery and Knockout.js <-->
+<script type='text/javascript' src='js/jquery.js'></script>
+<script type='text/javascript' src='js/knockout-min.js'></script>
+
+<script type="text/javascript">
+	
+        // Here's my data model
+   var viewModel = function () {
+		var self=this;
+	
+		// observes viewed page number
+	
+	/* 
+		self.viewPage = ko.observable(1);	
+	
+		self.viewerDensityF = ko.observable(1.0);
+		// observes viewer density
+		self.viewerDensityP = ko.computed(function() {
+			 return Math.round(128 * self.viewerDensityF());
+			//return 150;
+		});
+	
+		// observes rotation angle
+		self.rotation = ko.observable(0);
+	
+		// observes view Url
+		self.viewUrl = ko.computed(function() {
+			return "../pdf?page="+self.viewPage()+"&density="+self.viewerDensityP()+"&rotate="+self.rotation();
+		});
+	
+		*/
+	
+		// self.mailPwd = ko.observable();
+	
+		self.setDocuments = function() {
+			//$.post("../admin/mail-pwd", {'mailpwd': self.mailPwd()}); 
+			//self.mailPwd('');
+			//alert("docs");
+
+			$.post("../resultset/file", {'filename':'documents.json'});
+			
+		};
+
+		self.setTest = function() {
+			//$.post("../admin/mail-pwd", {'mailpwd': self.mailPwd()}); 
+			//self.mailPwd('');
+			//alert("test");
+
+			$.post("../resultset/file", {'filename':'test.json'});
+			
+		};
+	
+	
+	};
+	
+	var vm = new viewModel();
+    ko.applyBindings(vm); // This makes Knockout get to work
+		
+
+ </script>
+ 

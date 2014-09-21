@@ -1,0 +1,267 @@
+<html>
+	<head>
+    	<!-- <link href="css/style.css" rel="stylesheet" type="text/css"> -->
+
+	<title>Dynamic Form</title>
+	</head>
+	
+	<body>
+
+		<!-- ## Dynamic templates for various fields. -->
+		
+		<!-- Display field label and show property value as text -->
+		<script type="text/html" id="textfield-template">
+    			<h3 data-bind="text: label+ ' '+$root.modelData()[property]()">
+		</script>
+
+		
+		<!-- Display field label and edit property value as text -->
+		<script type="text/html" id="inputtextfield-template">
+    			<h3 data-bind="text: label"></h3>
+			<input type="text" class="form-control" data-bind="value: $root.modelData()[property], attr: {size:length, maxlength:length, placeholder:hint+' '+(mandatory ? '(required)':'')}, valueUpdate: 'afterkeydown'"></input>
+			<span class="label label-info" data-bind="visible:$root.showError()==true, text: $root.modelData()[property].validationMessage"></span>
+		</script>
+
+		<!-- Display field label and edit property value as textarea (memo) -->
+		<script type="text/html" id="inputtextarea-template">
+    			<h3 data-bind="text: label"></h3>
+			<textarea type="text" class="form-control" data-bind="value: $root.modelData()[property], attr: {maxlength:length, placeholder:hint+' '+(mandatory ? '(required)':'')}, valueUpdate: 'afterkeydown'"></textarea>
+			<span class="label label-info" data-bind="visible:$root.showError()==true, text: $root.modelData()[property].validationMessage"></span>
+		</script>
+
+
+		<!-- Display field label and edit pick country using a combobox -->
+		<script type="text/html" id="select-country-template">
+    			<h3 data-bind="text: label"></h3>
+ 			<select class="form-control" data-bind="options:options"></select>
+			<span class="label label-info" data-bind="visible:$root.showError()==true, text: $root.modelData()[property].validationMessage"></span>
+		</script>
+
+		<!-- Display field label and document preview in an image -->
+		<script type="text/html" id="document-preview-template">
+    			<h3 data-bind="text: label"></h3>
+		 	<img class="previewPage" data-bind="attr:{src: $root.getThumbUrl($root.modelData()[property]()) }" />
+			<a data-bind="attr: {href: '../wr2.html'}">  <span data-bind="text: $root.modelData()[property]"></span></a>
+		</script>
+
+		<!-- Display field label and edit property value as date -->
+		<script type="text/html" id="inputdatefield-template">
+    			<h3 data-bind="text: label"></h3>
+			<p class="dp">
+			
+<input 			</p>
+			<span class="label label-info" data-bind="visible:$root.showError()==true, text: $root.modelData()[property].validationMessage"></span>
+		</script>
+
+		<!-- ## End of Dynamic templates for various fields. -->
+
+ 		<!-- Dynamic form content. -->
+		<div class="container">
+
+				<h1 class="text-info">Dynamic Form</h1>
+		
+
+				<!-- vertical display of row properties -->
+				<table>
+					 <tbody data-bind="foreach: $root.viewContracts">
+			        		<tr class="resrow">
+			            			<td class="rescell">
+								
+								<!-- <div data-bind="template: { name: 'textfield-template', data: $data }"></div>  -->
+								<div data-bind="template: { name: $data.ui, data: $data }"></div>
+								
+							</td>
+			        		</tr>
+			    		</tbody>
+				</table>
+			
+			<button class="btn btn-primary btn-default" data-bind="enable:canSubmit(), click:$root.submit">Submit form</button>
+		</div>
+
+
+	<!-- experiment with xyz.. !-->
+  	 <p>Date: <input type="text"class="dp"></p>
+ <p>Date: <input type="text"  class="dp"></p>
+	</body>
+
+</html>
+
+
+<!--Include JavaScripts for JQuery and Knockout.js <-->
+<script type='text/javascript' src='js/jquery-2.1.1.min.js'></script>
+<script type='text/javascript' src='js/jquery-ui-1.11.1/jquery-ui.js'></script>
+<script type='text/javascript' src='js/knockout-3.2.0.js'></script>
+<script type='text/javascript' src='js/knockout.mapping-latest.js'></script>
+
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+
+
+<script type="text/javascript">
+
+
+
+   // ViewModel definition
+   var viewModel = function () {
+
+		var self=this;
+		
+		// holds model data
+		self.modelData = ko.observable();
+
+		self.modelDataP = function (propname) {
+			return "("+propname+") " + self.modelData()[propname];	
+		};
+
+		// holds view contracts
+		self.viewContracts = ko.observableArray();
+
+		// get image
+		self.getThumbUrl = function(x)
+		{
+			return "../pdf?filename=" + x + "&page=1&zoom=false&rotate=0&grayscale=true";
+		};
+
+		
+		self.showError = ko.observable(false);
+		
+
+		self.submit = function() {
+
+
+			
+
+
+			// find all mandatory viewcontracts
+			var mandatories = self.viewContracts().filter(function(item){
+				return (item.mandatory && item.mandatory==true);
+			});
+
+			var bErr=false;
+			for (var mand in mandatories) {
+				//alert(mand);	
+				var propName = mandatories[mand].property;
+				if (self.modelData()[propName].hasError()) {
+					bErr=true;
+					break;		
+				}
+			}
+
+			
+			self.showError(bErr);
+
+			if (bErr==false) {
+				alert("submit "+JSON.stringify(ko.mapping.toJS(self.modelData())));
+			}
+			
+		};
+
+		self.canSubmit = ko.computed(function() {
+			
+			return true;
+		});
+	
+
+		// populate this viewmodel
+		self.populate = function() {
+
+			// create (or fetch) sample data
+			var sampleData = ({
+				id	  : 1,
+				subject   : "Test",
+				comment   : "", // "This is a comment",
+				author    : "",
+				category  : "",  
+				postdate  : undefined,
+				residence : undefined,
+				doc 	  : "test.pdf"
+				}
+			);
+
+			// create an observable from sampleData
+			// so that we can consume plain DTO objects without explicitly declare each DTO property as Observable manually.
+			var oData = ko.mapping.fromJS(sampleData);
+
+
+			// set modelData to observable created from sample data
+			self.modelData(oData);
+			
+			// create (or fetch) viewcontract
+			// (a viewcontact defines what a view must implement when associated to modelData)
+			var vc = [
+				  {property : "id", 	   label : "Comment Id", ui : "textfield-template"},
+			 	  {property : "author",    label : "Author",     ui : "inputtextfield-template", length : 10,  mandatory : true, hint : "pseudo or e-mail"},
+ 				  {property : "residence", label : "Residence",  ui : "select-country-template", options: ["CH","Rest of World"]}, 
+  				  {property : "category",  label : "Category",   ui : "inputtextfield-template", length : 20,  mandatory : true, hint : ""},  
+				  {property : "subject",   label : "Subject",    ui : "inputtextfield-template", length : 20,  mandatory : true, hint : ""},
+  				  {property : "postdate",  label : "Post Date",  ui : "inputdatefield-template",  mandatory: true, hint : "date"},
+ 				  {property : "comment",   label : "Comment",    ui : "inputtextarea-template",  length : 255, mandatory : true, hint : "your comment here"},
+				  {property : "doc",       label : "Document",   ui : "document-preview-template"} 
+				];
+
+			
+			// find all mandatory viewcontracts
+			var mandatories = vc.filter(function(item){
+				return (item.mandatory && item.mandatory==true);
+			});
+			
+			// add a 'required' validator to each observable that is bound to a mandatory viewcontract
+			for (var mand in mandatories) {
+				var propName = mandatories[mand].property; 
+				self.modelData()[propName].extend({required : "Required"}); // "Please enter " + mandatories[mand].label}); 
+			}
+			
+
+			// set viewcontract
+			self.viewContracts(vc);
+		};
+	};
+	
+	// observable extender(s)
+
+	// mandatory extender
+	ko.extenders.required = function(target, overrideMessage) {
+
+   	 	//add some sub-observables to our observable
+   		target.hasError = ko.observable();
+   	 	target.validationMessage = ko.observable();
+ 
+   	 	//define a function to do validation
+    		function validate(newValue) {
+      	 		target.hasError(newValue ? false : true);
+       			target.validationMessage(newValue ? "" : overrideMessage || "This field is required");
+   		};
+ 
+   		//initial validation
+   		validate(target());
+ 
+    		//validate whenever the value changes
+   		target.subscribe(validate);
+ 
+   	 	//return the original observable
+   	 	return target;
+	};
+ 
+	// -- observable extender(s)
+	
+
+	// -- here we start ! --
+
+	var vm = new viewModel();
+	vm.populate();
+
+	// inject JQuery UI datepicker into elements having 'dt' class
+	 $( ".dp" ).datepicker();
+ 	
+   	ko.applyBindings(vm); // This makes Knockout get to work
+	
+ </script>
+ 

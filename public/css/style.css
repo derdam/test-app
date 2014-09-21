@@ -118,3 +118,18 @@ p.msgcontent {gh
 .bottomPager {
 	float: right;
 }
+
+
+.ko-grid {
+	background-color: #E8E8E8;
+	padding: 5px;
+}
+
+
+
+
+
+
+.validation-message {
+  color: red;
+}
