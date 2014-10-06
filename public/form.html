@@ -1,8 +1,6 @@
 <html>
 	<head>
-    	<!-- <link href="css/style.css" rel="stylesheet" type="text/css"> -->
-
-	<title>Dynamic Form</title>
+    		<title>Dynamic Form</title>
 	</head>
 	
 	<body>
@@ -47,9 +45,9 @@
 		<!-- Display field label and edit property value as date -->
 		<script type="text/html" id="inputdatefield-template">
     			<h3 data-bind="text: label"></h3>
-			<p class="dp">
+
 			
-<input 			</p>
+			
 			<span class="label label-info" data-bind="visible:$root.showError()==true, text: $root.modelData()[property].validationMessage"></span>
 		</script>
 
@@ -79,10 +77,11 @@
 		</div>
 
 
-	<!-- experiment with xyz.. !-->
-  	 <p>Date: <input type="text"class="dp"></p>
- <p>Date: <input type="text"  class="dp"></p>
-	</body>
+	
+    
+	</div>
+	
+</body>
 
 </html>
 
@@ -93,21 +92,23 @@
 <script type='text/javascript' src='js/knockout-3.2.0.js'></script>
 <script type='text/javascript' src='js/knockout.mapping-latest.js'></script>
 
+<!-- Bootstrap minified CSS -->
+<link href="bootstrap-3.2.0-dist/css/bootstrap.min.css" rel="stylesheet">
 
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<!-- Bootstrap minified CSS optional theme -->
+<link rel="stylesheet" href="bootstrap-3.2.0-dist/css/bootstrap-theme.min.css">
 
-<!-- Optional theme -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-
+<!-- Bootsrap minified JavaScript -->
+<script  type='text/javascript'  src="bootstrap-3.2.0-dist/js/bootstrap.min.js"></script>
 
 
+
+<-- datetime picker -->
+
+
+
+<!-- Main -->
 <script type="text/javascript">
-
-
 
    // ViewModel definition
    var viewModel = function () {
@@ -168,6 +169,14 @@
 			
 			return true;
 		});
+
+
+		self.bindDates = function() {
+			
+		// inject JQuery UI datepicker into elements having 'dt' class
+			// $( "#datetimepicker1" ).datetimepicker({});
+			
+		};
 	
 
 		// populate this viewmodel
@@ -219,10 +228,13 @@
 				self.modelData()[propName].extend({required : "Required"}); // "Please enter " + mandatories[mand].label}); 
 			}
 			
-
+			
 			// set viewcontract
 			self.viewContracts(vc);
-		};
+
+
+ 	
+			};
 	};
 	
 	// observable extender(s)
@@ -255,13 +267,14 @@
 
 	// -- here we start ! --
 
+	
+
 	var vm = new viewModel();
 	vm.populate();
 
-	// inject JQuery UI datepicker into elements having 'dt' class
-	 $( ".dp" ).datepicker();
- 	
    	ko.applyBindings(vm); // This makes Knockout get to work
+
+	vm.bindDates();
 	
  </script>
  

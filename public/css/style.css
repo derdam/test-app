@@ -126,10 +126,26 @@ p.msgcontent {gh
 }
 
 
-
-
-
+.padded {
+	padding-top: 2px;
+}
 
 .validation-message {
   color: red;
 }
+
+.borderless tbody tr td, .borderless thead tr th {
+    border: none;
+}
+
+.thumb-panel {
+	min-height:560px;
+	max-height:560px;
+	text-align: center;
+}
+
+.narrow-input {
+	width: 150px;
+}
+
+

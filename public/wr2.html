@@ -20,6 +20,7 @@
 		<!-- Result list: A table -->
 
 	<!-- result list -->
+	  <a name="top"></a>
 	  <div data-bind="visible:$root.viewerVisible()==false">
 		<!-- div class="banner"><h1>Web retrieval</h1></div -->
 		<div class="msgframe" >
@@ -76,28 +77,20 @@
 			</div>
 			<a name="pageTop"></a>
 			<div class="preview">
-				<img  class="previewPage" data-bind="click: $root.closeViewer, attr:{src: getThumbUrl0}" />
+				<img  class="previewPage" data-bind="attr:{src: getThumbUrl0}" />
 				<img  class="previewPage" data-bind="attr:{src: getThumbUrl1}" />
 			</div>
 			
 			<div>
 				<button data-bind="click: $root.perMail">Send me</button>
 			
-				<div data-bind="with: $root.viewerSettings", class="bottomPager"><span><button data-bind="click: $root.prevPageTop">-</button><span class="pagenum" data-bind="text: $root.newPage"></span></span><span><button data-bind="click: $root.nextPageTop">+</button></span>
+				<div data-bind="with: $root.viewerSettings", class="bottomPager"><span><button data-bind="click: $root.goTop">top</button><button data-bind="click: $root.goToolbar">toolbar</button><span>&nbsp</span><button data-bind="click: $root.prevPageTop">-</button><span class="pagenum" data-bind="text: $root.newPage"></span></span><span><button data-bind="click: $root.nextPageTop">+</button></span>
 				
 		</div>
 	  </div>
         </div>
 
-	<div class="msgframe" >
-				<div class="msghead"><strong>Add document</strong></div>
-				<div class="msgcontent">
-				from url: <input data-bind="value: $root.docUrlToAdd">
-				</input> title: <input data-bind="value:$root.docTitleToAdd"></input>
-				<button data-bind="click: $root.addDocument">Add</button>
-				</div>
-		</div>
-	</div>
+	
 	</body>
 
 </html>
@@ -140,12 +133,19 @@
 		})
 
 	
+		self.nop = function () {
+		};
+
 		// tracks zoom for thumbnails and page preview
 		self.zoom = ko.observable(false);
 	
 		// toggles between thumbnails and page preview	
 		self.toggleZoom = function() {
+
+			
 			self.zoom(!self.zoom());
+
+			
 		};
 		
 //// TODO : Remove page and work directly on viewerSettings
@@ -202,6 +202,16 @@
 			self.prevPage();
 			window.location = '#pageTop'; //'#preview' //'#pageTop';
 						
+		}
+
+		self.goTop = function() {
+			//alert("top");
+			window.location = '#top'; 
+			self.zoom(false);
+		}
+
+		self.goToolbar = function() {
+			window.location = "#preview";	
 		}
 	
 		// rotates page offset in degrees
@@ -294,7 +304,7 @@
 				self.viewerSettings({filename:undefined, page:1, rotation:0});
 
 			self.newPage(1);
-
+			// window.location = '#pageTop';
 			// window.location = "#preview";
 		};
 
@@ -357,7 +367,7 @@
 			$.post("remoteviewer", {url: docurl}); // { docid: id, page: displayedpage.toString()});
 		};	
 
-// bad design. Use websocket instead !!
+		// bad design. Use websocket instead !!
 
 		self.tick = function() {
 			$.get('/resultset/id',function(data, status)
@@ -375,7 +385,7 @@
 		};
 
 
-		setInterval(self.tick, 1600);
+		setInterval(self.tick, 1000);
 
 
 
@@ -387,7 +397,8 @@
 	// $.post('/resultset', {_id:'test'});
 	
 	var vm = new viewModel();
-			vm.viewerVisible(false);
+	
+	vm.viewerVisible(false);
         ko.applyBindings(vm); // This makes Knockout get to work
 	
 	vm.getDocuments(); // populate();
