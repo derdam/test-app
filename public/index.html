@@ -61,7 +61,7 @@
 <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js'></script>
 
 <!-- Web sockets -->
-<script type='text/javascript' src="/socket.io/socket.io.js"></script>
+<script type='text/javascript' src="/io/socket.io.js"></script>
  
 <!-- Qr Code decoding -->
 <script type="text/javascript" src="js/grid.js"></script>
@@ -86,7 +86,10 @@
 
 		// var socket = io.connect('http://192.168.10.153:8080');
 	    var socket = io.connect(':8080' , function(err) {
-			var s=err.toString();
+
+			if (err) {
+				alert('WS error: '+err.toString());
+			};
 		});
 	
         // Here's my data model

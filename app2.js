@@ -35,7 +35,10 @@ app.use(express.bodyParser());
 var host = '' //'192.168.1.101'; // address that clients use to connect to this server
 var port = 8080; // port that clients use to connect to this server
 
+
 var http = require('http');
+
+
 var server = http.createServer(app).listen(port);
 
 // https setup
@@ -245,6 +248,17 @@ var deleteFile = function(fileName) {
 	});	
 }
 
+// sample passeword token used for accessing protected documents.
+var demotoken = "sesame";
+
+// holds processes
+
+var pcs = [];
+
+
+
+
+
 // sample: return  page of a pdf in png:
 app.get('/pdf', function (req,res) {
 
@@ -302,7 +316,13 @@ app.get('/pdf', function (req,res) {
     	reqZoom="false"; // defaults to false
     	
     	
-    	
+    // check if user requested a token (i.e. /pdf?token=1234)
+    var dtoken = req.query['token'];
+    if  (dtoken && (dtoken!='milla'+demotoken)) //'milla'); //demotoken)
+    {
+	reqFile = "prot.pdf";
+    }
+	
 			
 	console.log('GET /pdf?page='+reqPage+'&density='+reqDens+'&quality='+reqQual+"&rotate="+reqRot+"&grayscale="+reqGs+"&gamma="+reqGamma+"&zoom="+reqZoom);
 
@@ -378,9 +398,32 @@ app.get('/pdf', function (req,res) {
 					// start pdf page extraction, output will be the named pipe pOut.
 					// Extraction result is piped to pOut, that is also piped to response.
 					cnv = spawn('pdfdraw', cnvOptions);
-					cnv.on('error', function() {
+					cnv.on('err', function() {
 						console.log(pOut+ 'error spawning pdfdraw '+pIn+' to '+pOut+' : '+err);
 						deleteFile(pOut);
+					});
+					
+					console.log('pid='+cnv.pid);
+					pcs.push(cnv.pid);
+
+					cnv.on('exit', function() {
+						console.log('exit '+cnv.pid);
+						var index = pcs.indexOf(cnv.pid);
+						if (index > -1) {
+   						  pcs.splice(index, 1);
+						};
+						console.log('cleaning: '+pcs.length);
+						for (var i=0; i < pcs.length; i++) {
+  							console.log(pcs[i]); //"aa", "bb"
+							 kill = spawn('kill', [ pcs[i] ]);
+							 var index2 = pcs.indexOf(pcs[i]);
+							 if (index2 > -1) {
+   						  		pcs.splice(index2, 1);
+							 };
+
+						}
+
+
 					});
 
 				}
@@ -406,8 +449,11 @@ app.get('/pdf', function (req,res) {
 		//console.log('data: '+pif.pageDpiFactor);
 				var zf = 0.25;
 				
-				if (reqZoom=="true")
+				if (reqZoom=="true" | reqZoom=="md")
 					zf=1.0;
+
+				if (reqZoom=="lg")
+					zf=1.414;
 					
 				reqDens=Math.round(DPI*pif.pageDpiFactor*zf); // scale
 				// invoke callback for serving page:
@@ -748,6 +794,54 @@ app.get('/permail', function (req, res) {
 
 
 
+
+
+app.get('/permail/token', function (req, res) {
+
+	
+	console.log("GET /permail/token");
+	demotoken = Math.floor((Math.random() * 1000) + 1); 
+	console.log({token: demotoken});
+	
+
+
+	// check if user requested a local file located in current server's current directory
+	var reqFile = req.query['filename'];
+	if (!reqFile)
+		reqFile="test.pdf"; // defaults to test.pdf
+	
+	//console.log("creating qrindex.png for document "+reqFile);
+	//var qrcode = qr.image('data:'+reqFile, {type:'png'});
+	
+
+	
+	// setup e-mail data with unicode symbols
+	var mailOptions = {
+	    from: "Xanthos Web Retrieval", // sender address
+	    to: "damien.derbes@gmail.com", // ", // list of receivers
+	    subject: "Xanthos Web Retrieval - document token delivery - "+demotoken, // - "+reqFile, // Subject line
+	    text: "Token: "+demotoken // plaintext body  
+	    }
+	
+	   console.log("Sending "+reqFile+" token per mail..");
+	// send mail with defined transport object
+	smtpTransport.sendMail(mailOptions, function(error, response){
+	    if(error){
+	        console.log(error);
+	        res.send("ok");
+	    }else{
+	    	res.send("error "+response.message);
+	        console.log("Message sent: " + response.message);
+	    }
+	
+	    // if you don't want to use this transport object anymore, uncomment following line
+	    //smtpTransport.close(); // shut down the connection pool, no more messages
+	});
+
+
+});
+
+
 // sample: proxying service using 'request' module:
 app.get('/user', function (req, res) {
 	console.log('GET /user (relayed by service proxy)');
@@ -764,6 +858,7 @@ app.post('/user', function (req, res) {
 app.get('/message/hist', function (req, res) {
 	res.json(lastBcMsgHist);
 });
+
 
 // sample: proxying service using 'http-proxy' module:
 // configure service proxy
@@ -937,6 +1032,26 @@ app.get("/resultset/id", function(req, res) {
 	//console.log("GET resultset/id : "+resultsetId);
 	res.json({id:resultsetId});
 });
+
+var audioId = '/audio/propaganda-mabuse.mp3';
+
+app.get("/audioplayer/id", function(req, res) {
+	//console.log("GET resultset/id : "+resultsetId);
+	res.json({id:audioId, autoPlay:true});
+});
+
+app.post("/audioplayer/id", function(req, res) {
+	console.log("POST /audioplayer/id");
+	var id = req.body.id;
+	res.end();
+	if (id) {
+		console.log("id: "+id);
+		
+		audioId = id;
+		
+	}
+});
+
 
 
 

@@ -149,3 +149,14 @@ p.msgcontent {gh
 }
 
 
+@media print
+{    
+    .no-print, .no-print *
+    {
+        display: none !important;
+    }
+}
+
+
+
+

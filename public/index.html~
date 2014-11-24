@@ -46,7 +46,10 @@
 				</tbody>
 			</table>
 		</div>
-		
+		<a name="preview"></a>
+		<div class="msgframe">
+			<img  class="previewPage" data-bind="attr:{src: getThumbUrl}" />
+		</div>
 		
 	</body>
 
@@ -54,11 +57,11 @@
 
 
 <!--Include JavaScripts for JQuery and Knockout.js <-->
-<script type='text/javascript', src='http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.js'></script>
-<script type='text/javascript', src='http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js'></script>
+<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.js'></script>
+<script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js'></script>
 
 <!-- Web sockets -->
-<script src="/socket.io/socket.io.js"></script>
+<script type='text/javascript' src="/socket.io/socket.io.js"></script>
  
 <!-- Qr Code decoding -->
 <script type="text/javascript" src="js/grid.js"></script>
@@ -82,7 +85,12 @@
 <script type="text/javascript">
 
 		// var socket = io.connect('http://192.168.10.153:8080');
-	    var socket = io.connect(':8080');
+	    var socket = io.connect(':8080' , function(err) {
+
+			if (err) {
+				alert('WS error: '+err.toString());
+			};
+		});
 	
         // Here's my data model
         var viewModel = {
@@ -98,7 +106,9 @@
 			broadcastHistory: ko.observableArray()
         };
 		
-		
+		viewModel.getThumbUrl = ko.computed(function() {
+			return viewModel.message();
+		});
 
 		viewModel.onMsgClick = function(data) {
 			// alert(data.content);

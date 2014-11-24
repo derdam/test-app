@@ -1,0 +1,26 @@
+ <!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Title of the document</title>
+</head>
+
+<body>
+
+
+
+
+	<canvas id="myCanvas" width="1000" height="1414" style="border:1px solid #000000;"></canvas> 
+ 	
+</body>
+
+</html>
+
+<script>
+	var c = document.getElementById("myCanvas");
+	var ctx = c.getContext("2d");
+
+			var img = new Image;
+			img.onload = function(){ ctx.drawImage(img,0,0,1000,1414); };
+			img.src = "/img/test.svg";
+</script> 

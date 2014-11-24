@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta name="viewport" content="width=device-width">
+    		<link href="css/style.css" rel="stylesheet" type="text/css">
+		<title>Web retrieval</title>
+	</head>
+	
+	<body>
+          <a name="top"/>
+	  <nav class="navbar navbar-inverse">
+      	     <div class="container-fluid">
+              
+        	<div class="navbar-header"><a class="navbar-brand" href="#">Documents</a></div>
+        	
+          	    <ul class="nav navbar-nav">
+            		<li class="active"><a href="#">All</a></li>
+            		<li data-bind="click: $root.booksFilter"><a href="#">Books</a></li>
+            		<li><a href="#">Articles</a></li>
+	    		<li><a href="#">Catalogs</a></li>
+	    		<li><a href="#">Archives</a></li>
+          	    </ul>
+        	
+              
+     	     </div>
+    	  </nav>
+ 	  <div class="container-fluid"> 	
+	   	  
+		  <!-- hitlist container -->
+ 		
+		  <div class="row">
+			 <div class="col-md-4">	
+			   <div class="list-group"> 	
+                             <a href="#" class="list-group-item disabled">Documents</a>	   
+			     <div data-bind="foreach: items">
+			       <div data-bind="click: $root.selRow"><a href="#" class="list-group-item"><span data-bind="text: $data.Title"/></a></div>
+ 	                      </div>
+			   </div>
+                         </div> 
+
+			<a name="viewer"/>
+
+			<div class="col-md-8">
+			<div class="panel panel-default">
+			        
+   				 <div class="panel-heading">
+    				    <button class="btn" data-bind="click: $root.toggleZoom">zZz</button>
+				&nbsp page<span><button class="btn" data-bind="click: $root.prevPage">&lt;</button><input class="control pageNum" data-bind="value: $root.newPage"></input> <button class="btn" data-bind="click: $root.nextPage">&gt;</button> </span></span>
+			
+			&nbsp orientation<span> 
+				    <button class="btn" data-bind="click: $root.rot(-90)">-90°</button>
+				    <button class="btn" data-bind="click: $root.rot(-0.2)">-</button>
+				    <button class="btn" data-bind="click: $root.rot(0.2)">+</button>
+				    <button class="btn" data-bind="click: $root.rot(90)">+90°</button></span>
+   				 </div>
+				
+				<div class="panel-body text-center">
+				    <img  class="previewPage" data-bind="attr:{src: getThumbUrl0}" />
+				</div>
+				<div class="panel-footer">
+				 <div>
+					<button class="btn" data-bind="click: $root.perMail">Send me</button>
+			
+					  <div data-bind="with: $root.viewerSettings, visible:$root.zoom", class="bottomPager"><button class="btn" data-bind="click: $root.goTop">top</button><span>&nbsp</span><button class="btn" data-bind="click: $root.prevPageTop">-</button><span class="pagenum" data-bind="text: $root.newPage"></span></span><span><button class="btn" data-bind="click: $root.nextPageTop">+</button></span>
+				
+					</div>
+				</div> 
+			      </div>
+			      	
+			</div>
+		  </div>
+		
+ 		
+		</div>
+	
+	
+	
+	</body>
+
+</html>
+
+
+<!--Include JavaScripts for JQuery and Knockout.js <-->
+<script type='text/javascript', src='js/jquery.js'></script>
+
+
+<script type='text/javascript', src='js/knockout-min.js'></script>
+
+
+
+<!-- Bootstrap minified CSS -->
+<link href="bootstrap-3.2.0-dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap minified CSS optional theme -->
+<link rel="stylesheet" href="bootstrap-3.2.0-dist/css/bootstrap-theme.min.css">
+
+<!-- Bootsrap minified JavaScript -->
+<script  type='text/javascript'  src="bootstrap-3.2.0-dist/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+	
+        // Here's my data model
+        var viewModel = function () {
+
+		var self=this;
+
+		var oldid = {id:'0'};
+	
+		// tracks URL of document to add
+		self.docUrlToAdd = ko.observable();
+	
+		// tracks title of document to add
+		self.docTitleToAdd = ko.observable();
+	
+		// tracks current document PDF properties
+		self.pdfProps = ko.observable();
+
+		// tracks viewer visibility	
+		self.viewerVisible = ko.observable();
+	  
+		// tracks viewer settings (document, page, zoom, ...)
+		// so that dependant observables like getThumbUrl() can be triggered only once for many settings changes
+ 		self.viewerSettings = ko.observable( {filename:undefined, page:1, rotation:undefined} );
+
+		self.viewerSettingsJ = ko.computed(function() {
+			return JSON.stringify(self.viewerSettings());
+		})
+
+	
+		self.nop = function () {
+		};
+
+		// tracks zoom for thumbnails and page preview
+		self.zoom = ko.observable(true);
+	
+		// toggles between thumbnails and page preview	
+		self.toggleZoom = function() {
+
+			
+			self.zoom(!self.zoom());
+
+			
+		};
+		
+//// TODO : Remove page and work directly on viewerSettings
+
+		/*
+		self.pager = ko.computed(function() {
+			var p = self.viewerSettings().page;
+			alert(p);
+			return p;
+		})
+		*/
+		
+		self.newPage = ko.observable(1);
+
+		self.goPage = ko.computed(function() {
+			//alert(self.newPage());
+			var vs = { filename: self.viewerSettings().filename, page: parseInt(self.newPage()), rotation:self.viewerSettings().rotation };
+				self.viewerSettings(vs);
+				//self.newPage(page);	
+		})
+		
+		// display previous page
+		self.prevPage = function() 
+		{	
+			var page = self.viewerSettings().page;
+			if (page>1) {
+				page-=1;
+				var vs = { filename: self.viewerSettings().filename, page: page, rotation:self.viewerSettings().rotation };
+				self.viewerSettings(vs);
+				self.newPage(page);	
+			}
+		}
+	
+	  	 // display next page
+		self.nextPage = function()
+		{
+			var page = self.viewerSettings().page+1;
+			var vs = { filename: self.viewerSettings().filename, page: page , rotation:self.viewerSettings().rotation };
+			self.viewerSettings(vs);
+			self.newPage(page);
+		};
+	
+		// display next page and pan the client to the top of the page
+		self.nextPageTop = function()
+		{
+			self.nextPage();
+			window.location = '#viewer'; //'#preview' //'#pageTop';
+						
+		}
+
+		// display previous page and pan the client to the top of the page
+		self.prevPageTop = function()
+		{
+			self.prevPage();
+			window.location = '#viewer'; //'#preview' //'#pageTop';
+						
+		}
+
+		self.goTop = function() {
+			//alert("top");
+			window.location = '#top'; 
+			//self.zoom(false);
+		}
+
+		self.goToolbar = function() {
+			window.location = "#viewer";	
+		}
+	
+		// rotates page offset in degrees
+		self.rot = function(offset) {
+			var rot = self.viewerSettings().rotation;
+			rot+=offset;
+			if (rot>360 || rot<-360)
+			{
+				rot=0;
+			}
+			var vs = { filename: self.viewerSettings().filename, page: self.viewerSettings().page , rotation:rot};
+			self.viewerSettings(vs);
+		}
+
+
+		self.thumbZoom = ko.observable(1.0);
+
+		self.thumbWidth = ko.computed(function() {
+			return 315 * self.thumbZoom();
+		});
+
+		// 446
+		self.thumbHeight = ko.computed(function() {
+			return 446 * self.thumbZoom();
+		});
+
+		self.thumbContainerHeight = ko.computed(function() {
+			return 560 * self.thumbZoom();
+		});
+
+		self.booksFilter = function() {
+			$.post("../resultset/file", {'filename':'books.json'});
+		};
+
+		// tracks resultlist items
+        	self.items = ko.observableArray();
+	
+		// track column names based on 1st item in items
+		self.columnNames = ko.computed(function() {
+			if (self.items().length === 0)
+            			return [];
+        		var props = [];
+        		var obj = self.items()[0];
+        		for (var name in obj) {
+				if (name==='_id') {
+					// props.push({'colname':'_id', 'type':'url'});	
+				} else {
+					props.push({'colname':name, 'type':''});
+				}
+         		}
+			
+        		return props;
+  		});
+
+		// observes the selected row in result list
+		self.selectedRow = ko.observable();
+
+		// returns the value of a column identified by name from the selected row in result list
+		self.getCol = function(col) {
+
+			var jso = self.selectedRow();
+			if (jso) {
+				var run = jso[col];
+				return run
+			}
+		};
+  
+
+		self.addDocument = function() {
+				self.items.push({'DocumentType': 'Unknown','Title': self.docTitleToAdd(), 'Format':'pdf', '_id':self.docTitleToAdd()});
+				$.post("/pdf/input/?filename="+self.docTitleToAdd()+"&url="+self.docUrlToAdd()); 
+		}
+
+		// retrieve documents list from server		
+		self.getDocuments = function() {
+			var coll;
+			$.get("/resultset", function(data, status)
+			{
+				coll = JSON.parse(data);
+				
+				self.items(coll);
+			});
+			
+		
+			
+		}
+	
+		// sample: add document to items collection
+		self.populate = function() {
+			self.items.push({'DocumentType': 'Article','Title': 'Trace-based JIT Type Specialization for Dynamic Languages', 'Format':'pdf', '_id':'test.pdf' });
+
+		};
+
+// Event handlers
+
+
+		
+	
+		// called when user selects a row in result list
+		self.selRow = function(row) {
+			self.selectedRow(row);
+			var id = row['_id'];
+
+			self.goToolbar();
+			if (id)
+				self.viewerSettings({filename:id, page:1, rotation:0});
+			else
+				self.viewerSettings({filename:undefined, page:1, rotation:0});
+
+			self.newPage(1);
+			// window.location = '#pageTop';
+			// window.location = "#preview";
+		};
+
+		// called when the user closes the viewer	
+		self.closeViewer = function() {
+			self.viewerVisible(false);
+		}
+	
+	
+		self.getThumbUrl = function(docid, page) {
+			var dt = self.getCol('DocumentType');
+			var extra = '';
+			if (dt) {
+				if (dt==='Book' | dt==='Archive') {
+					extra = "&grayscale=true";
+					if (dt==='Archive') {
+						extra = extra + "&gamma=0.7";					
+					}
+				}
+				
+			}
+			return "../pdf?filename="+docid+"&page="+page.toString() + "&zoom=" + self.zoom()+"&rotate="+self.viewerSettings().rotation+extra;
+		};
+	
+
+		self.getThumbUrl0 = ko.computed(function() {
+			var id = self.getCol('_id');
+			if (id) {
+				
+				var ret = self.getThumbUrl(id, self.viewerSettings().page);
+				// self.putRemoteViewer(ret);
+			
+				return ret;
+			}
+		});
+
+
+	   	self.updateDocPdfProps = function(docid) {
+			$.get("../pdf/info/?filename="+docid+"&page="+self.viewerSettings().page(), self.pdfProps);
+		}
+	
+
+	
+		// demo: send sample document per email
+		self.perMail = function() {
+			var id = self.getCol('_id');
+			if (id) {
+				$.get("permail?filename="+id);
+			}
+		};
+	
+		
+		// demo: send a PUT request to remoteviewer
+		self.putRemoteViewer = function(docurl) {
+			$.post("remoteviewer", {url: docurl}); // { docid: id, page: displayedpage.toString()});
+		};	
+
+		// bad design. Use websocket instead !!
+
+		self.tick = function() {
+			$.get('/resultset/id',function(data, status)
+			{
+				newid = JSON.parse(data);
+				
+				if(newid.id!=oldid.id) {
+					// alert(newid.id);
+					self.getDocuments();
+					self.selectedRow(undefined);	
+					
+				}
+				oldid=newid;
+			});
+		};
+
+
+		setInterval(self.tick, 1600);
+
+
+
+
+    };
+
+	
+	
+	// $.post('/resultset', {_id:'test'});
+	
+	var vm = new viewModel();
+	
+	vm.viewerVisible(false);
+        ko.applyBindings(vm); // This makes Knockout get to work
+	
+	vm.getDocuments(); // populate();
+
+	// $('ko-grid').addClass('table');
+		
+ </script>
+ 

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+	<head>
+    	<link href="css/style.css" rel="stylesheet" type="text/css">
+		<title>Resultset</title>
+	</head>
+	
+	<body>
+	
+
+		<audio 
+		  controls="controls" preload="none"
+		  data-bind="attr: { src: $root.track(), autoplay: $root.autoPlay() }, event: { play: $root.audioPlay }" 
+		  type="audio/mp3">Your browser does not support the audio element.
+		</audio> 
+		<div><span data-bind="text: $root.track()"></span></div>
+		<div>
+		 <button data-bind="click: $root.newOrder">New Order - Blue Monday</button>
+		 <button data-bind="click: $root.perfectKiss">New Order - Perfect Kiss</button>
+		 <button data-bind="click: $root.propaganda">Propaganda - Dr. Mabuse</button>
+		 <button data-bind="click: $root.yello">Yello - Lost Again</button>
+                </div>
+	</body>
+
+</html>
+
+
+<!--Include JavaScripts for JQuery and Knockout.js <
+<script type='text/javascript' src='js/jquery.js'></script>
+<script type='text/javascript' src='js/knockout-min.js'></script>-->
+
+<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.js'></script>
+<script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js'></script>
+
+
+<!-- Web sockets -->
+<script type='text/javascript' src="/socket.io/socket.io.js"></script>
+ 
+
+<script type="text/javascript">
+
+
+  var socket = io.connect(':8080' , function(err) {
+
+			if (err) {
+				alert('WS error: '+err.toString());
+			};
+		});
+
+	
+	
+        // Here's my data model
+   var viewModel = function () {
+		var self=this;
+	
+		// observes viewed page number
+	
+	/* 
+		self.viewPage = ko.observable(1);	
+	
+		self.viewerDensityF = ko.observable(1.0);
+		// observes viewer density
+		self.viewerDensityP = ko.computed(function() {
+			 return Math.round(128 * self.viewerDensityF());
+			//return 150;
+		});
+	
+		// observes rotation angle
+		self.rotation = ko.observable(0);
+	
+		// observes view Url
+		self.viewUrl = ko.computed(function() {
+			return "../pdf?page="+self.viewPage()+"&density="+self.viewerDensityP()+"&rotate="+self.rotation();
+		});
+	
+		*/
+	
+		// self.mailPwd = ko.observable();
+
+		
+	
+		self.track = ko.observable('audio/propaganda-mabuse.mp3');
+	
+		self.newOrder = function() {
+			//self.track('audio/new-order-blue-monday.mp3');
+			//self.autoPlay(true);
+
+			// $.post("../audioplayer/id", {'id':'audio/new-order-blue-monday.mp3'});
+			socket.emit('message', {id:'audio/new-order-blue-monday.mp3'});
+			self.autoPlay(true);
+		};
+
+		self.propaganda = function() {
+			socket.emit('message', {id:'audio/propaganda-mabuse.mp3'});
+			self.autoPlay(true);
+			
+		};
+
+		self.perfectKiss = function() {
+			socket.emit('message',  {id:'audio/new-order-perfect-kiss.mp3'});
+			self.autoPlay(true);
+		};
+
+		self.yello = function() {
+			socket.emit('message', {id:'audio/yello-lost-again.mp3'});
+			self.autoPlay(true);
+			
+		};
+
+		self.audioPlay = function() {
+			// alert("play");
+		};
+
+		self.autoPlay = ko.observable(false);
+		
+		
+		
+		
+	};
+	
+	var vm = new viewModel();
+        ko.applyBindings(vm); // This makes Knockout get to work
+	
+
+
+	socket.on('message', function(message) {
+			var sm = JSON.stringify(message);
+			//alert('Received this message : ' + sm);
+			var obj = JSON.parse(sm);
+			vm.track(obj.content.id);
+				
+		});	
+
+ </script>
+ 
