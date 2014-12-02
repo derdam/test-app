@@ -349,8 +349,8 @@
 
 	$.anythingZoomer.defaultOptions = {
 		// content areas
-		smallArea   : 'small',    // class of small content area; the element with this class name must be inside of the wrapper
-		largeArea   : 'large',    // class of large content area; this class must exist inside of the wrapper. When the clone option is true, it will add this automatically
+		smallArea   : 'az-cl-small',    // class of small content area; the element with this class name must be inside of the wrapper
+		largeArea   : 'az-cl-large',    // class of large content area; this class must exist inside of the wrapper. When the clone option is true, it will add this automatically
 		clone       : false,      // Make a clone of the small content area, use css to modify the style
 		// appearance
 		overlay     : false,      // set to true to apply overlay class "az-overlay"; false to not apply it

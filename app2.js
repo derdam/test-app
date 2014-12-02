@@ -334,6 +334,7 @@ app.get('/pdf', function (req,res) {
 		
 		// on linux/ubuntu we use /dev/shm RAM storage for temporary files.
 		var pOut = "/dev/shm/"+pIn+"."+reqPage.toString()+"-"+pdfcount.toString()+".png";
+		
 		//spawn("mkfifo", [pOut]);
 
 
@@ -376,6 +377,8 @@ app.get('/pdf', function (req,res) {
 		  		//console.log('mkfifo process exited with code ' + code);
 				
 				if (code==0) {
+
+					
 
 					// create a stream that can read the named pipe pOut
 					var rs = fs.createReadStream(pOut);

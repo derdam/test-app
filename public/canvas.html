@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta name="viewport" content="width=device-width">
+    		<link href="css/style.css" rel="stylesheet" type="text/css">				
+		<link rel="stylesheet" href="css/anythingzoomer.css">
+		
+
+		<title>Web retrieval</title>
+	</head>
+	
+	<body>
+          <a name="top"/> 
+	  <nav class="navbar navbar-inverse">
+      	     <div class="container-fluid">
+              
+        	<div class="navbar-header"><a class="navbar-brand" href="#">Documents</a></div>
+        	
+          	    <ul class="nav navbar-nav">
+            		<li data-bind="click: $root.allFilter"><a href="#">All</a></li>
+            		<li data-bind="click: $root.booksFilter"><a href="#">Books</a></li>
+            		<li data-bind="click: $root.articlesFilter"><a href="#">Articles</a></li>
+	    		<li data-bind="click: $root.uploadsFilter"><a href="#">Uploads</a></li>
+	    		
+          	    </ul>
+        	
+              
+     	     </div>
+    	  </nav>
+ 	  <div class="container-fluid no-print"> 	
+	   	  
+		  <!-- hitlist container -->
+ 		
+		  <div class="row">
+			 <div class="col-md-3">	
+			   <div class="list-group"> 	
+                            <!-- <a href="#" class="list-group-item disabled">Documents</a> -->	   
+			     <div data-bind="foreach: items">
+			       <!-- <div data-bind="click: $root.selRow"><a href="#" class="list-group-item"><span data-bind="text: $data.Title"/></a></div> -->
+ 				<a data-bind="click: $root.selRow" href="#" class="list-group-item"><span data-bind="text: $data.Title"/></a>
+ 	                      </div>
+			   </div>
+                         </div> 
+
+			 <a name="toolbar"/> 
+
+			<div class="col-md-9">
+
+<div class="panel panel-default text-center">
+<div class="panel panel-heading">
+<form data-bind="visible: $root.isSelPdf()" class="form-inline" role="form">
+
+  <!-- zZt zoom toggle -->
+  <div class="form-group">
+    <button class="btn btn-default" data-bind="click: $root.toggleZoom">zZz</button>
+  </div>
+
+ <div class="form-group"></div>
+  
+  <div class="form-group"></div>
+  
+
+  <!-- Pager --> 
+  <div class="form-group">
+    <div class="input-group narrow-input">
+      <span class="input-group-btn"><button class="btn btn-default" type="button" data-bind="click: $root.prevPage">&lt;</button></span>
+      <input type="text" class="form-control text-center" data-bind="value: $root.newPage"/>
+      <span class="input-group-btn"><button class="btn btn-default" type="button" data-bind="click: $root.nextPage">&gt;</button></span>
+    </div><!-- /input-group -->
+  </div>
+
+  <div class="form-group"></div>  
+  <div class="form-group"></div>
+  
+  <!-- Orientation, rotation -->
+  <div class="form-group">
+   <div class="input-group">
+     <button class="btn btn-default" data-bind="click: $root.rot(-90)">-90°</button>
+     <button class="btn btn-default" data-bind="click: $root.rot(-0.2)">-</button>
+     <button class="btn btn-default" data-bind="click: $root.rot(0.2)">+</button>
+     <button class="btn btn-default" data-bind="click: $root.rot(90)">+90°</button>
+   </div>
+
+  </form>
+
+  			
+ </div>
+
+ <!-- Audio / Video player -->
+<form data-bind="visible: $root.isSelAv()" class="form-inline" role="form">
+	<div class="form-group">
+		
+		<audio 
+		  controls="controls" preload="none"
+		  data-bind="attr: { src: $root.track(), autoplay: false }, event: {}" 
+		  type="audio/mp3">Your browser does not support the audio element.
+		</audio> 
+		
+	</div>
+  </form>
+</div>
+			  
+				
+				<div data-bind="visible: $root.isSelPdf()" class="panel-body text-center">
+				 <a name="topdoc"/>
+				<!-- <canvas id="canvas" style="background-image:url('img/test2-lb.png');"></canvas> -->
+				<!-- <canvas id="canvas" data-bind="style:{backgroundImage: 'url(img/test2-lb.png)'}"></canvas> -->
+				<canvas id="canvas" data-bind="style:{backgroundImage: canvasBg}"></canvas>
+				</div>
+
+
+				<div data-bind="visible: $root.isSelAv()">
+					<h1><span data-bind="text: $root.track()"></h1></div>
+				</div>
+
+
+				<div class="panel-footer">
+				 <div>
+					<button class="btn btn-default" data-bind="click: $root.perMail">Send me</button>
+			
+					  <div data-bind="with: $root.viewerSettings, visible:$root.zoom && $root.isSelPdf()", class="bottomPager"><button class="btn btn-default" data-bind="click: $root.goTop">top</button><span>&nbsp</span><button class="btn btn-default" data-bind="click: $root.prevPageToolbar">-</button><span class="pagenum" data-bind="text: $root.newPage"></span></span><span><button class="btn btn-default" data-bind="click: $root.nextPageToolbar">+</button></span>
+				
+					</div>
+				</div> 
+			      </div>
+			      	
+			</div>
+		  </div>
+		
+ 		
+		</div>
+	
+	<!-- upload form, formidable test-->
+	<div>
+	    <form action="http://localhost:8082/upload" enctype="multipart/form-data" method="post">
+	        <input type="text" name="title"><br>
+		<input type="file" name="upload" multiple="multiple"><br>
+	        <input type="submit" value="Upload">
+    	    </form>
+
+	</div>		
+
+	</body>
+
+</html>
+
+
+<!--Include JavaScripts for JQuery and Knockout.js <-->
+<!-- <script type='text/javascript', src='js/jquery.js'></script> -->
+<!--   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>  -->
+ <script src="js/jquery/1.8.3/jquery.min.js"></script>
+
+
+<script src="js/jquery.anythingzoomer.js"></script>
+
+<script type='text/javascript', src='js/knockout-min.js'></script>
+
+
+
+<!-- Bootstrap minified CSS -->
+<link href="bootstrap-3.2.0-dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap minified CSS optional theme -->
+<link rel="stylesheet" href="bootstrap-3.2.0-dist/css/bootstrap-theme.min.css">
+
+<!-- Bootsrap minified JavaScript -->
+<script  type='text/javascript'  src="bootstrap-3.2.0-dist/js/bootstrap.min.js"></script>
+
+<!-- Bootbox -->
+<script type="text/javascript" src="js/bootbox.min.js"></script>
+
+
+
+
+<script type="text/javascript">
+	
+        // Here's my data model
+        var viewModel = function () {
+
+		var self=this;
+
+		var oldid = {id:'0'};
+	
+		// tracks URL of document to add
+		self.docUrlToAdd = ko.observable();
+	
+		// tracks title of document to add
+		self.docTitleToAdd = ko.observable();
+	
+		// tracks current document PDF properties
+		self.pdfProps = ko.observable();
+
+		// tracks viewer visibility	
+		self.viewerVisible = ko.observable();
+	  
+		// tracks viewer settings (document, page, zoom, ...)
+		// so that dependant observables like getThumbUrl() can be triggered only once for many settings changes
+ 		self.viewerSettings = ko.observable( {filename:undefined, page:1, rotation:undefined} );
+
+		self.viewerSettingsJ = ko.computed(function() {
+			return JSON.stringify(self.viewerSettings());
+		})
+
+	
+		self.nop = function () {
+		};
+
+		// tracks zoom for thumbnails and page preview
+		self.zoom = ko.observable(true);
+	
+		// toggles between thumbnails and page preview	
+		self.toggleZoom = function() {
+
+		
+			var z = self.zoom();
+
+			if (z==true)
+				self.zoom("lg");
+			if (z=="lg")
+				self.zoom(true);
+					
+			// self.zoom(!self.zoom());
+
+			
+		};
+		
+//// TODO : Remove page and work directly on viewerSettings
+
+		/*
+		self.pager = ko.computed(function() {
+			var p = self.viewerSettings().page;
+			alert(p);
+			return p;
+		})
+		*/
+		
+		self.newPage = ko.observable(1);
+		
+
+		self.goPage = ko.computed(function() {
+			//alert(self.newPage());
+			var vs = { filename: self.viewerSettings().filename, page: parseInt(self.newPage()), rotation:self.viewerSettings().rotation };
+				self.viewerSettings(vs);
+
+				//self.newPage(page);	
+		})
+		
+		// display previous page
+		self.prevPage = function() 
+		{	
+			var page = self.viewerSettings().page;
+			if (page>1) {
+				page-=1;
+				var vs = { filename: self.viewerSettings().filename, page: page, rotation:self.viewerSettings().rotation };
+				self.viewerSettings(vs);
+				self.newPage(page);	
+			}
+		}
+	
+	  	 // display next page
+		self.nextPage = function()
+		{
+			var page = self.viewerSettings().page+1;
+			var vs = { filename: self.viewerSettings().filename, page: page , rotation:self.viewerSettings().rotation };
+			self.viewerSettings(vs);
+			self.newPage(page);
+		};
+	
+		// display next page and pan the client to the top of the page
+		self.nextPageTop = function()
+		{
+			self.nextPage();
+			self.goTop();
+						
+		}
+
+		// display previous page and pan the client to the top of the page
+		self.prevPageToolbar = function()
+		{
+			self.prevPage();
+			self.goToolbar();
+						
+		}
+
+
+		// display next page and pan the client to the top of the page
+		self.nextPageToolbar = function()
+		{
+			self.nextPage();
+			self.goToolbar();
+						
+		}
+
+		// display previous page and pan the client to the top of the page
+		self.prevPageTop = function()
+		{
+			self.prevPage();
+			self.goTop();
+						
+		}
+
+		self.track = ko.observable('');
+
+		self.goTop = function() {
+			//alert("top");
+			window.location = '#topdoc'; 
+			//self.zoom(false);
+		}
+
+		self.goToolbar = function() {
+			window.location = "#toolbar";	
+		}
+	
+		// rotates page offset in degrees
+		self.rot = function(offset) {
+			var rot = self.viewerSettings().rotation;
+			rot+=offset;
+			if (rot>360 || rot<-360)
+			{
+				rot=0;
+			}
+			var vs = { filename: self.viewerSettings().filename, page: self.viewerSettings().page , rotation:rot};
+			self.viewerSettings(vs);
+		}
+
+
+		self.thumbZoom = ko.observable(1.0);
+
+		self.thumbWidth = ko.computed(function() {
+			return 315 * self.thumbZoom();
+		});
+
+		// 446
+		self.thumbHeight = ko.computed(function() {
+			return 446 * self.thumbZoom();
+		});
+
+		self.thumbContainerHeight = ko.computed(function() {
+			return 560 * self.thumbZoom();
+		});
+
+		self.booksFilter = function() {
+			$.post("../resultset/file", {'filename':'books.json'});
+		};
+
+		self.allFilter = function() {
+			$.post("../resultset/file", {'filename':'documents.json'});
+		};
+
+		self.articlesFilter = function() {
+			$.post("../resultset/file", {'filename':'test.json'});
+		};
+
+		self.uploadsFilter = function() {
+			$.post("../resultset/file", {'filename':'uploads.json'});
+		};
+
+		// tracks resultlist items
+        	self.items = ko.observableArray();
+	
+		// track column names based on 1st item in items
+		self.columnNames = ko.computed(function() {
+			if (self.items().length === 0)
+            			return [];
+        		var props = [];
+        		var obj = self.items()[0];
+        		for (var name in obj) {
+				if (name==='_id') {
+					// props.push({'colname':'_id', 'type':'url'});	
+				} else {
+					props.push({'colname':name, 'type':''});
+				}
+         		}
+			
+        		return props;
+  		});
+
+		// observes the selected row in result list
+		self.selectedRow = ko.observable();
+
+		
+		// returns the value of a column identified by name from the selected row in result list
+		self.getCol = function(col) {
+
+			var jso = self.selectedRow();
+			if (jso) {
+				var run = jso[col];
+				return run
+			}
+		};
+  
+		
+		self.addDocument = function() {
+				self.items.push({'DocumentType': 'Unknown','Title': self.docTitleToAdd(), 'Format':'pdf', '_id':self.docTitleToAdd()});
+				$.post("/pdf/input/?filename="+self.docTitleToAdd()+"&url="+self.docUrlToAdd()); 
+		}
+
+		// retrieve documents list from server		
+		self.getDocuments = function() {
+			var coll;
+			$.get("/resultset", function(data, status)
+			{
+				coll = data; // JSON.parse(data);
+				
+				self.items(coll);
+			});
+			
+		
+			
+		}
+	
+		// sample: add document to items collection
+		self.populate = function() {
+			self.items.push({'DocumentType': 'Article','Title': 'Trace-based JIT Type Specialization for Dynamic Languages', 'Format':'pdf', '_id':'test.pdf' });
+
+		};
+
+// Event handlers
+
+		self.isSelPdf = function() {
+		
+			if (self.getCol('Format')=='pdf')
+				return true;
+
+			var dt = self.getCol('DocumentType');
+			if (dt=='application/pdf')
+				return true;
+			else
+			   return false;
+			// row['DocumentType']=='application/pdf'
+		}
+
+		self.isSelAv = function() {
+			
+			var dt = self.getCol('DocumentType');
+			if (dt=='audio/mpeg')
+				return true;
+			else
+			   return false;
+			// row['DocumentType']=='application/pdf'
+		}
+		
+		self.token="";
+
+	
+		// called when the user closes the viewer	
+		self.closeViewer = function() {
+			self.viewerVisible(false);
+		}
+	
+	
+		self.getThumbUrl_lg = ko.computed(function() {
+			var id = self.getCol('_id');
+			if (id) {
+				
+				var ret = self.getThumbUrl(id, self.viewerSettings().page, 'lg');
+				// self.putRemoteViewer(ret);
+			
+				return ret;
+			}	
+		});
+
+		self.getThumbUrl_md = ko.computed(function() {
+			var id = self.getCol('_id');
+			if (id) {
+				
+				var ret = self.getThumbUrl(id, self.viewerSettings().page, 'md');
+				// self.putRemoteViewer(ret);
+			
+				return ret;
+			}	
+		});
+
+
+		self.getThumbUrl = function(docid, page, bs_size) {
+			var dt = self.getCol('DocumentType');
+			var extra = '';
+			if (dt) {
+				if (dt==='Book' | dt==='Archive') {
+					extra = "&grayscale=true";
+					if (dt==='Archive') {
+						extra = extra + "&gamma=0.7";					
+					}
+				}
+				
+			}
+
+			extra = extra + "&token="+self.token;
+			
+
+			if (bs_size) {
+				// alert(bs_size);
+				return "../pdf?filename="+docid+"&page="+page.toString() + "&zoom=" + bs_size+"&rotate="+self.viewerSettings().rotation+extra;
+			} else {
+
+				return "../pdf?filename="+docid+"&page="+page.toString() + "&zoom=" + self.zoom()+"&rotate="+self.viewerSettings().rotation+extra;
+			}
+		};
+	
+
+		var img;
+
+		self.getThumbUrl0 = ko.computed(function() {
+			var id = self.getCol('_id');
+			if (id) {
+				
+				var ret = self.getThumbUrl(id, self.viewerSettings().page);
+				// self.putRemoteViewer(ret);
+			
+				return ret;
+			}
+		});
+
+
+		self.canvasBg = ko.computed(function() {
+			//  return "url(" + "https://localhost:8081/img/test-blur.png" +")";
+			return "url(" + "img/test-blur.png" +")";
+			// return "url(" + self.getThumbUrl0() + ")";
+
+		});
+
+		self.loadCanvas = ko.computed( function() {
+		
+		
+		  var canvas = document.getElementById("canvas");
+                  if (canvas) {
+			var ctx = canvas.getContext("2d");
+
+			img = new Image();
+			img.onload = function () {
+				
+	
+    				canvas.height = img.height;
+				canvas.width =  img.width;
+
+				
+			};
+
+			img.src =  self.getThumbUrl0();	// "https://localhost:8081/img/test2-lb.png"; // self.getThumbUrl0();	
+		    };
+
+		});
+
+
+
+                self.selRowOpenDoc = function(row) {
+			var id = row['_id'];
+			if (id) {
+						self.selectedRow(row);
+					
+						self.goToolbar();
+			
+						if (id && self.isSelPdf()) {
+							
+							self.viewerSettings({filename:id, page:1, rotation:0});
+							
+							self.newPage(1);
+							
+						}
+
+						if (id && self.isSelAv()) {
+							self.track("audio/"+id);
+						}
+			}
+		}
+
+
+		// called when user selects a row in result list
+		self.selRow = function(row) {
+			var id = row['_id'];
+			
+			if (id) {
+					
+				$.get("permail/token?filename="+id);
+				// self.token = "";
+				// self.selRowOpenDoc(row);
+	 			bootbox.prompt({
+        				title: 'Enter Your Password',
+        				inputType: 'password',
+       				 buttons: {
+           				 confirm: {
+               				 label: 'Submit'
+           			 	}
+       				 },
+      				 callback: function(value){
+          				 self.token = value;
+          				 self.selRowOpenDoc(row);
+        			 }
+  			       });
+    			}
+		};
+
+
+
+
+
+	   	self.updateDocPdfProps = function(docid) {
+			$.get("../pdf/info/?filename="+docid+"&page="+self.viewerSettings().page(), self.pdfProps);
+		}
+	
+
+	
+		// demo: send sample document per email to user
+		self.perMail = function() {
+			var id = self.getCol('_id');
+			if (id) {
+				$.get("permail?filename="+id);
+			}
+		};
+	
+		
+		// demo: send a PUT request to remoteviewer
+		self.putRemoteViewer = function(docurl) {
+			$.post("remoteviewer", {url: docurl}); // { docid: id, page: displayedpage.toString()});
+		};	
+
+		// bad design. Use websocket instead !!
+
+		self.tick = function() {
+			$.get('/resultset/id',function(data, status)
+			{
+				//alert(data.id);
+				
+				//newid = JSON.parse("'"+data+"'");
+
+				newid = data;
+				
+				if(newid.id!=oldid.id) {
+					// alert(newid.id);
+					self.getDocuments();
+					self.selectedRow(undefined);	
+					
+				}
+				oldid=newid;
+			});
+		};
+
+
+		// hitlist change poller
+		setInterval(self.tick, 3200);
+
+		// handle keys
+		document.onkeydown = checkKey;
+
+		function checkKey(e) {
+   		    e = e || window.event;
+		    var id = self.getCol('_id');
+		    if (id) { 
+   			 if ((e.keyCode == '37' && e.ctrlKey) | (e.keyCode == '109' | e.keyCode == '189')) { // left
+     			   self.prevPageTop();
+			   e.preventDefault();
+          		   return false;
+   			 }
+   			 else if ((e.keyCode == '39' && e.ctrlKey) | (e.keyCode == '107' | e.keyCode === '187')) { // right
+   		           self.nextPageTop();
+			   e.preventDefault();
+         		   return false;
+   			 }
+
+			if (e.keyCode == 90 && e.ctrlKey) {  
+      				
+				self.toggleZoom();
+				 e.preventDefault();
+         		   	return false;				
+			}  
+		    }
+		}
+
+	
+		$(".zoom").anythingZoomer({
+			overlay : true,
+			edit: false,
+			// If you need to make the left top corner be at exactly 0,0, adjust the offset values below
+                        // offsetX: 249,
+			offsetX : 79,
+			offsetY : 49
+		});
+
+
+		// Canvas event handlers
+
+		$('canvas').bind('contextmenu', function(e){  	// disable context menu on canvas
+		    return false;
+		}); 
+
+
+		var paint = false;
+		var ctx = undefined;
+
+		$('#canvas').mousedown(function(e){		 // handle mouse down on canvas
+
+  			var mouseX = e.pageX - $(this).offset().left
+  			var mouseY = e.pageY - $(this).offset().top
+		
+  			paint = true;
+			var canvas = document.getElementById("canvas");
+                 	
+			ctx = canvas.getContext("2d");
+			ctx.drawImage(img, mouseX-150, mouseY-100, 300,200, mouseX-150, mouseY-100,300,200);
+			
+		});
+
+		$('canvas').mousemove(function(e) {		// handle mouse move on canvas
+			if (paint) {
+				var mouseX = e.pageX - $(this).offset().left
+  				var mouseY = e.pageY - $(this).offset().top
+
+				var canvas = document.getElementById("canvas");
+				
+				// ctx has already be assigned in mousedown event			  
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				
+				ctx.drawImage(img, mouseX-150, mouseY-100, 300,200, mouseX-150, mouseY-100,300,200);
+		
+			}
+		});
+
+		
+		$('#canvas').mouseup(function(e) {		 // handle mouse up on canvas
+
+  		  if (paint)  {	
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			paint=false;
+		  }
+	
+    		});
+
+	}
+
+	// $.post('/resultset', {_id:'test'});
+	
+	var vm = new viewModel();
+	
+	vm.viewerVisible(false);
+        ko.applyBindings(vm); // This makes Knockout get to work
+
+
+	
+	vm.getDocuments(); // populate();
+
+	// $('ko-grid').addClass('table');
+
+
+
+		
+ </script>
+ 
